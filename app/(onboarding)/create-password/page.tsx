@@ -40,7 +40,7 @@ export default function CreatePasswordPage() {
       if (isReset) {
         window.location.href = "/home";
       } else {
-        router.push("/business-name");
+        router.push("/meet-spal");
       }
     } catch {
       setError("Something went wrong. Please check your connection.");

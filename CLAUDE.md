@@ -13,7 +13,7 @@
 - Stop at each phase gate and wait for review.
 
 ## Commands
-`npm run typecheck` · `npm test` · `npm run lint` · `npm run build:web` (static export to `dist/`, deployed by Vercel)
+`npm run typecheck` · `npm test` (vitest) · `npm run lint` · `npm run build` (webpack) · `npm run dev` (webpack; Turbopack fails on this CSS setup)
 
 ## Stack (see docs/DECISIONS.md)
 Next.js 16 (App Router, PWA) · Supabase (Postgres, Auth, Storage) · Anthropic Claude (server routes only) · Paystack · Vercel.

@@ -44,6 +44,15 @@ export function explainSignals(a: PlacementAnswers, level: Level): string[] {
   if (level >= 1) s.push(a.isRegistered ? 'Your business is registered' : 'Your business is not registered yet');
   if (level >= 2) s.push(a.paidStaffCount > 0 ? `You pay ${a.paidStaffCount} ${a.paidStaffCount === 1 ? 'person' : 'people'}` : "You're running it on your own so far");
   if (level >= 3) s.push(a.locationsOrChannels > 1 ? `You sell across ${a.locationsOrChannels} locations or channels` : 'You operate from one place or channel');
-  while (s.length < 3) s.push(a.monthsRunning ? `You've been running for ${a.monthsRunning} months` : 'You told us where you are today');
+  while (s.length < 3) s.push(describeDuration(a.monthsRunning) ?? 'You told us where you are today');
   return s.slice(0, 3);
+}
+
+/** Months arrive as buckets, so describe them loosely rather than claim precision. */
+export function describeDuration(months?: number): string | null {
+  if (months === undefined) return null;
+  if (months < 3) return "You only started recently";
+  if (months < 12) return "You've been running for under a year";
+  if (months < 36) return "You've been running for a couple of years";
+  return "You've been running for several years";
 }

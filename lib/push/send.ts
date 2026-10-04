@@ -2,11 +2,16 @@ import webpush from "web-push";
 import type { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-webpush.setVapidDetails(
-  "mailto:support@spal.app",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+// Configured on first send, not at import, so `next build` works without the keys.
+let vapidReady = false;
+function ensureVapid(): boolean {
+  if (vapidReady) return true;
+  const pub = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const priv = process.env.VAPID_PRIVATE_KEY;
+  if (!pub || !priv) return false;
+  webpush.setVapidDetails("mailto:support@spal.app", pub, priv);
+  return (vapidReady = true);
+}
 
 export interface PushPayload { title: string; body: string; url?: string; tag?: string }
 export interface Sub { user_id: string; endpoint: string; p256dh: string; auth: string }
@@ -25,6 +30,7 @@ export async function allSubscriptions(): Promise<Sub[]> {
 
 /** Send one payload to one subscription; prunes dead subscriptions (410/404). */
 export async function sendPush(sub: Sub, payload: PushPayload): Promise<boolean> {
+  if (!ensureVapid()) return false;
   try {
     await webpush.sendNotification(
       { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
