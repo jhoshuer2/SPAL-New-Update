@@ -14,3 +14,7 @@
 
 ## Commands
 `npm run typecheck` · `npm test` · `npm run lint` · `npm run build:web` (static export to `dist/`, deployed by Vercel)
+
+## Stack (see docs/DECISIONS.md)
+Next.js 16 (App Router, PWA) · Supabase (Postgres, Auth, Storage) · Anthropic Claude (server routes only) · Paystack · Vercel.
+Legacy product notes: docs/legacy/OLD_SPAL_CLAUDE.md. Next.js 16 has breaking changes — read AGENTS.md before writing code.

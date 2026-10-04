@@ -1,0 +1,68 @@
+/* SPAL, Color tokens. Ground truth: app/globals.css @theme + component source (MrItrends/spal). */
+:root{
+  /* ── Brand base ──────────────────────────────────────────────── */
+  --spal-green:#22C55E;   /* sales · primary CTA · success · "paid" */
+  --spal-blue:#2563EB;    /* profit · AI · insights */
+  --spal-orange:#F97316;  /* expenses / owing, sparingly, never a co-equal brand color */
+  --spal-purple:#8B5CF6;  /* coach / learn */
+  --spal-navy:#0F172A;    /* dominant tone, text, headings, primary surfaces */
+  --spal-bg:#EEF3E9;      /* app background, the soft sage-green canvas. This tint IS the signature. */
+
+  /* ── Tints, each accent gets 50/100/(200)/500/600/(700) ───────── */
+  --green-50:#F0FDF4; --green-100:#DCFCE7; --green-200:#BBF7D0;
+  --green-500:#22C55E; --green-600:#16A34A; --green-700:#15803D;
+
+  --orange-50:#FFF7ED; --orange-100:#FFEDD5;
+  --orange-500:#F97316; --orange-600:#EA580C; --orange-700:#C2410C;
+
+  --blue-50:#EFF6FF; --blue-100:#DBEAFE;
+  --blue-500:#2563EB; --blue-600:#1D4ED8;
+
+  --purple-50:#F5F3FF; --purple-100:#EDE9FE;
+  --purple-500:#8B5CF6; --purple-600:#7C3AED;
+
+  /* ── Neutrals, cool-shifted (zinc), never warm gray ───────────── */
+  --neutral-50:#FAFAFA; --neutral-100:#F4F4F5; --neutral-200:#E4E4E7; --neutral-300:#D4D4D8;
+  --neutral-400:#A1A1AA; --neutral-500:#71717A; --neutral-600:#52525B; --neutral-700:#3F3F46;
+  --neutral-800:#27272A; --neutral-900:#18181B;
+
+  /* ── Vivid display accents, hero/data-viz cards only, never text-on-white ── */
+  --vivid-profit:#8B3CFF;  /* profit hero card */
+  --vivid-sale:#2F63F5;    /* sale stat card */
+  --vivid-expense:#ED712E; /* expense stat card */
+  --vivid-green:#22C55E;
+
+  /* ── Semantic surfaces ───────────────────────────────────────── */
+  --surface-app:var(--spal-bg);
+  --surface-card:#FFFFFF;
+  --surface-canvas-dark:#06090F; /* desktop letterbox behind the mobile shell */
+
+  --surface-owed-bg:#D3E0C7; --surface-owed-text:#2E3D22; --surface-owed-text-2:#4A5D38; --surface-owed-border:#BBCDA8;
+  --surface-healthy-bg:#F0FDF4; --surface-healthy-text:#15803D;
+  --surface-low-bg:#FFF7ED; --surface-low-text:#C2410C;
+  --surface-out-bg:#FEF2F2; --surface-out-text:#B91C1C;
+
+  /* ── Text ────────────────────────────────────────────────────── */
+  --text-primary:var(--spal-navy);
+  --text-secondary:var(--neutral-500);
+  --text-muted:var(--neutral-400);
+  --text-on-dark:#FFFFFF;
+  --text-on-dark-muted:rgba(255,255,255,0.7);
+
+  /* ── Record-category palette (Records screen chips/icons) ───────── */
+  --cat-food-bg:#FFF0E6; --cat-food-fg:#F97316;
+  --cat-drinks-bg:#E6F4FF; --cat-drinks-fg:#2563EB;
+  --cat-breakfast-bg:#E6FAF0; --cat-breakfast-fg:#16A34A;
+  --cat-lunch-bg:#FFF7E6; --cat-lunch-fg:#D97706;
+  --cat-dinner-bg:#F3E8FF; --cat-dinner-fg:#9333EA;
+  --cat-snacks-bg:#FEE2E2; --cat-snacks-fg:#DC2626;
+  --cat-desserts-bg:#FDF4FF; --cat-desserts-fg:#C026D3;
+  --cat-groceries-bg:#ECFDF5; --cat-groceries-fg:#059669;
+  --cat-transport-bg:#EFF6FF; --cat-transport-fg:#3B82F6;
+  --cat-utilities-bg:#F5F3FF; --cat-utilities-fg:#7C3AED;
+  --cat-salary-bg:#F0FDF4; --cat-salary-fg:#22C55E;
+  --cat-rent-bg:#FFF1F2; --cat-rent-fg:#E11D48;
+  --cat-marketing-bg:#FFF7ED; --cat-marketing-fg:#EA580C;
+  --cat-services-bg:#EFF6FF; --cat-services-fg:#2563EB;
+  --cat-default-bg:#F4F4F5; --cat-default-fg:#71717A;
+}

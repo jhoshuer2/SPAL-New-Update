@@ -1,0 +1,5 @@
+/* SPAL webfonts. Satoshi is licensed via Fontshare (not redistributable as static files) , 
+   loaded the same way production SPAL loads it. Inter Tight is Google Fonts, also loaded by URL
+   for portability. See readme.md → "Fonts" for the flagged substitution note. */
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap');

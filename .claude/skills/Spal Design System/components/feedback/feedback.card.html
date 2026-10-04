@@ -1,0 +1,23 @@
+<!-- @dsCard group="Components" viewport="700x480" name="Feedback, Insight, Undo, Skeleton" -->
+<html><head><link rel="stylesheet" href="../../styles.css"><script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script><script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script><script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script><script src="../../_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--spal-bg);padding:20px;font-family:var(--font-body)}.lbl{font-size:10px;color:var(--neutral-400);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px}.stack{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}</style>
+</head><body><div id="root"></div>
+<script type="text/babel">
+const { InsightCard, Skeleton, SkeletonRow } = window.SpalDesignSystem_6a1cb4;
+function Demo(){
+  return (<div>
+    <div className="lbl">Insight cards</div>
+    <div className="stack">
+      <InsightCard variant="celebration" title="Best day this week!" message="You made 12% more than your weekly average." metric="+12%" />
+      <InsightCard variant="tip" title="Tip from SPAL" message="Try recording expenses right after you pay, it takes 5 seconds." />
+      <InsightCard variant="warning" title="Spending is up" message="Expenses this week are higher than usual." metric="-8%" positive={false} />
+    </div>
+    <div className="lbl">Loading (skeleton, never a spinner)</div>
+    <div className="stack" style={{maxWidth:360}}>
+      <SkeletonRow/><SkeletonRow/>
+    </div>
+  </div>);
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<Demo/>);
+</script>
+</body></html>

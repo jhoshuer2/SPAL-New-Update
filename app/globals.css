@@ -1,0 +1,407 @@
+﻿@import "tailwindcss";
+
+/* =============================================
+   SPAL Design System — Tailwind v4 CSS Config
+   ============================================= */
+
+@theme {
+  /* ── Brand colors ──────────────────────────── */
+  --color-spal-green:  #22C55E;
+  --color-spal-blue:   #2563EB;
+  --color-spal-orange: #F97316;
+  --color-spal-purple: #8B5CF6;
+  --color-spal-navy:   #0F172A;
+  --color-spal-bg:     #EEF3E9;
+
+  /* Green shades */
+  --color-spal-green-50:  #F0FDF4;
+  --color-spal-green-100: #DCFCE7;
+  --color-spal-green-200: #BBF7D0;
+  --color-spal-green-500: #22C55E;
+  --color-spal-green-600: #16A34A;
+  --color-spal-green-700: #15803D;
+
+  /* Orange shades */
+  --color-spal-orange-50:  #FFF7ED;
+  --color-spal-orange-100: #FFEDD5;
+  --color-spal-orange-500: #F97316;
+  --color-spal-orange-600: #EA580C;
+
+  /* Blue shades */
+  --color-spal-blue-50:  #EFF6FF;
+  --color-spal-blue-100: #DBEAFE;
+  --color-spal-blue-500: #2563EB;
+  --color-spal-blue-600: #1D4ED8;
+
+  /* Purple shades */
+  --color-spal-purple-50:  #F5F3FF;
+  --color-spal-purple-100: #EDE9FE;
+  --color-spal-purple-500: #8B5CF6;
+  --color-spal-purple-600: #7C3AED;
+
+  /* Neutrals — cool-shifted for clarity */
+  --color-neutral-50:  #FAFAFA;
+  --color-neutral-100: #F4F4F5;
+  --color-neutral-200: #E4E4E7;
+  --color-neutral-300: #D4D4D8;
+  --color-neutral-400: #A1A1AA;
+  --color-neutral-500: #71717A;
+  --color-neutral-600: #52525B;
+  --color-neutral-700: #3F3F46;
+  --color-neutral-800: #27272A;
+  --color-neutral-900: #18181B;
+
+  /* Typography */
+  --font-satoshi: 'Satoshi', system-ui, sans-serif;
+  --font-inter:   var(--font-inter-tight), 'Inter Tight', system-ui, sans-serif;
+
+  /* Radius */
+  --radius-sm:   0.5rem;
+  --radius-md:   1rem;
+  --radius-lg:   1.5rem;
+  --radius-xl:   2rem;
+  --radius-full: 9999px;
+}
+
+/* =============================================
+   Base Styles
+   ============================================= */
+
+:root {
+  --background: #F7F9F5;
+  --foreground: #0F172A;
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sat: env(safe-area-inset-top, 0px);
+
+  /* Shadow tokens */
+  --shadow-card:    0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-card-lg: 0 2px 6px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.08);
+  --shadow-btn-green:  0 4px 14px rgba(29,185,84,0.38);
+  --shadow-btn-blue:   0 4px 14px rgba(37,99,235,0.35);
+}
+
+html, body {
+  height: 100%;
+  /*
+   * The document never scrolls or pans. The app lives in #app-root (pinned to the
+   * viewport); pages scroll inside <main>. Setting only overflow-x:hidden used to
+   * make html and body vertical scroll containers too, which let the whole app
+   * (and its bottom bar) be dragged around on phones.
+   */
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv01", "ss01";
+}
+
+body {
+  /*
+   * Body fills the FULL viewport — dark canvas on desktop.
+   * Do NOT add max-width here. #app-root is the 480px shell.
+   * width: 100% ensures the dark bg bleeds edge-to-edge on wide screens.
+   */
+  width: 100%;
+  background-color: #06090F;
+  color: var(--foreground);
+  font-family: var(--font-inter);
+  position: relative;
+}
+
+/* ── Desktop canvas decoration ─────────────────────────────────────────────
+   Shown only when viewport is wider than the app shell.
+   Adds a subtle branded glow so the canvas feels intentional, not empty.
+   ────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 520px) {
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 30%, rgba(34, 197,  94, 0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 80% 70%, rgba(37,  99, 235, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-satoshi);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+/* =============================================
+   Responsive Layout Tokens
+   ============================================= */
+
+:root {
+  /* Horizontal page padding — shrinks on very small phones */
+  --px-page:    1.25rem;  /* 20px — default */
+  --px-page-sm: 1rem;     /* 16px — ≤ 374px  */
+
+  /* Vertical section gap */
+  --gap-section: 1.5rem;
+
+  /* App shell max width (single source of truth) */
+  --shell-max-w: 480px;
+
+  /*
+   * Bottom nav footprint — single source of truth for every floating CTA /
+   * toast / content that must clear the fixed BottomNav. Includes the device
+   * safe-area so nothing sits under the home indicator on notched phones.
+   * Referenced as `calc(var(--bottom-nav-h) + …)` across screens.
+   */
+  --bottom-nav-h: calc(84px + var(--sab));
+}
+
+/* Very small phones (iPhone SE 1st gen, cheap Androids) */
+@media (max-width: 374px) {
+  :root {
+    --px-page: var(--px-page-sm);
+  }
+
+  /* Scale down oversized headings so nothing clips */
+  h1 { font-size: clamp(22px, 7vw, 28px) !important; }
+  h2 { font-size: clamp(18px, 6vw, 22px) !important; }
+}
+
+/* =============================================
+   PWA / Mobile Utilities
+   ============================================= */
+
+/* Use dynamic viewport height where supported */
+.h-screen-safe {
+  height: 100svh;
+  height: 100dvh; /* preferred — accounts for collapsible browser chrome */
+}
+
+.min-h-screen-safe {
+  min-height: 100svh;
+  min-height: 100dvh;
+}
+
+.pb-safe {
+  padding-bottom: calc(var(--sab) + 4rem);
+}
+
+.bottom-nav {
+  padding-bottom: var(--sab);
+}
+
+/* Fixed CTA bars / FABs — above the BottomNav; falls back to the home indicator
+   when the bar is hidden (full-screen flows, keyboard open). */
+.cta-bottom {
+  bottom: calc(max(var(--bottom-nav-h), var(--sab)) + 0.5rem);
+}
+
+/* Scroll area of the main shell. The BottomNav is the last row of the shell (in
+   flow), so <main> already ends above it; only when the bar is hidden do we need
+   the home-indicator inset here. */
+.pb-shell {
+  padding-bottom: max(0px, calc(var(--sab) - var(--bottom-nav-h)));
+}
+
+/* Page content: a little breathing room above the bottom bar. (The bar is in flow,
+   so content can never end underneath it.) */
+.pb-nav {
+  padding-bottom: 1rem;
+}
+
+/* Same, for screens with a floating action button (56px tall) over the content. */
+.pb-nav-fab {
+  padding-bottom: 6rem;
+}
+
+/* Page-level horizontal padding using the responsive token */
+.px-page {
+  padding-left:  var(--px-page);
+  padding-right: var(--px-page);
+}
+
+.scroll-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+/* =============================================
+   SPAL Surface System
+   ============================================= */
+
+/* Standard card — precise multi-layer shadow + zinc border */
+.spal-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(228, 228, 231, 0.8);
+  box-shadow: var(--shadow-card);
+}
+
+/* Elevated card — for bottom sheets, modals */
+.spal-card-elevated {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(228, 228, 231, 0.6);
+  box-shadow: var(--shadow-card-lg);
+}
+
+/* Glass card — for overlays on colored backgrounds */
+.spal-card-glass {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Glass nav — frosted bottom navigation */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.88);
+  border-top: 1px solid rgba(228, 228, 231, 0.5);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* =============================================
+   Input System
+   ============================================= */
+
+.spal-input {
+  width: 100%;
+  height: 3.5rem;
+  padding: 0 1rem;
+  background: #fff;
+  border: 1.5px solid #E4E4E7;
+  border-radius: 14px;
+  color: #0F172A;
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  -webkit-appearance: none;
+}
+
+.spal-input::placeholder {
+  color: #A1A1AA;
+  font-weight: 400;
+}
+
+.spal-input:focus {
+  border-color: #22C55E;
+  box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.12);
+}
+
+.spal-input-email:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* =============================================
+   Button Glow Helpers
+   ============================================= */
+
+.btn-glow-green {
+  box-shadow: var(--shadow-btn-green);
+}
+
+.btn-glow-blue {
+  box-shadow: var(--shadow-btn-blue);
+}
+
+/* =============================================
+   Gradient Backgrounds
+   ============================================= */
+
+.gradient-spal {
+  background: linear-gradient(145deg, #22C55E 0%, #1a9e48 40%, #1a6ebf 100%);
+}
+
+.gradient-spal-warm {
+  background: linear-gradient(145deg, #22C55E 0%, #F97316 100%);
+}
+
+.gradient-spal-soft {
+  background: linear-gradient(135deg, #F0FDF4 0%, #EFF6FF 50%, #F5F3FF 100%);
+}
+
+.gradient-spal-card {
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+}
+
+/* =============================================
+   Section Labels
+   ============================================= */
+
+.spal-section-label {
+  font-family: var(--font-satoshi);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #A1A1AA;
+}
+
+/* =============================================
+   Animations
+   ============================================= */
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
+}
+
+@keyframes wave-bar {
+  0%, 100% { transform: scaleY(0.3); }
+  50%       { transform: scaleY(1); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Waveform bars */
+.wave-bar {
+  animation: wave-bar 0.8s ease-in-out infinite;
+}
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+/* Loading skeleton shimmer */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #F4F4F5 25%,
+    #ECECED 50%,
+    #F4F4F5 75%
+  );
+  background-size: 200% auto;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 6px;
+}
+
+/* =============================================
+   Scrollbar
+   ============================================= */
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+

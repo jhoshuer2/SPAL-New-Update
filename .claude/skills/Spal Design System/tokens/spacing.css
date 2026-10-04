@@ -1,0 +1,26 @@
+/* SPAL, Spacing & radius tokens. The signature rhythm: tight in-card (4–12px), generous between sections (24–32px). */
+:root{
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:20px;
+  --space-6:24px; --space-7:28px; --space-8:32px; --space-10:40px; --space-12:48px;
+  --space-16:64px; --space-20:80px;
+
+  --space-page-x:20px;      /* horizontal page padding, 16px below 374px width */
+  --space-page-x-sm:16px;
+  --space-section-gap:24px; /* vertical rhythm between major sections */
+
+  --shell-max-w:480px;      /* mobile-app shell cap, centred on desktop */
+  --shell-min-w:320px;
+
+  /* Radius hierarchy, anchored to the app's ACTUAL rendered radii (the inline
+     rounded-* classes it ships), not the globals.css @theme token *definitions*.
+     Note: the app's @theme defines --radius sm/md/lg/xl = 8/16/24/32px, but in
+     practice screens use inline rounded-2xl (16), rounded-[20px], rounded-t-[28px].
+     These design-system values match what actually renders. */
+  --radius-xs:10px;   /* small chips, inner steppers */
+  --radius-sm:14px;   /* compact inputs */
+  --radius-md:16px;   /* standard cards + inputs, the app's dominant rounded-2xl (16px) */
+  --radius-lg:20px;   /* stat / hero cards, app rounded-[20px] */
+  --radius-xl:24px;   /* elevated cards, dialogs */
+  --radius-2xl:28px;  /* bottom sheets (top corners), app rounded-t-[28px] */
+  --radius-full:9999px; /* buttons, pills, avatars */
+}
