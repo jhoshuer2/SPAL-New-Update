@@ -37,7 +37,7 @@ function relTime(iso: string) {
 // Non-perishable / retail dashboard (kiosk, supermarket, clothing, salon, etc.).
 // The perishable (restaurant/bar) dashboard is a separate component — see
 // components/home/PerishableHome.tsx and PERISHABLE_DASHBOARD.md.
-export function RetailHome() {
+export function RetailHome({ slot }: { slot?: React.ReactNode } = {}) {
   const router = useRouter();
   const { user } = useSPALStore();
   // All data + business logic lives in the shared hook so any other view (e.g.
@@ -86,6 +86,8 @@ export function RetailHome() {
           </button>
         </div>
       </div>
+
+      {slot}
 
       {/* Period tabs */}
       <div className="px-5 mt-5">

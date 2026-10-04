@@ -62,3 +62,13 @@ export const LEVELS: LevelDef[] = [
 ];
 
 export const levelDef = (l: Level): LevelDef => LEVELS[l];
+
+/** Common challenges per level (D02). Plain-language starter copy; editable content. */
+export const LEVEL_CHALLENGES: Record<Level, string[]> = {
+  0: ["Not knowing where to start", "Worry about getting the first customer", "Unsure how much money you really need"],
+  1: ["Money is unclear day to day", "Pricing without knowing your profit", "Mixing business and personal money"],
+  2: ["Keeping records steady every week", "Registration, TIN and tax", "Deciding when to hire"],
+  3: ["Handing work over", "Paying salaries on time", "Keeping everyone on the same page"],
+  4: ["Growing without losing quality", "Getting funding", "Running things when you're not there"],
+  5: ["Handing over day-to-day control", "Choosing the next move", "Passing on what you've learned"],
+};

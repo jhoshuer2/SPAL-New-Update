@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS public.user_milestones (
   completed_by text CHECK (completed_by IN ('user','data','spal','placement')),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (user_id, business_id, milestone_id)
+  UNIQUE (user_id, milestone_id) -- per user for now; per-business scoping arrives with multiple businesses (F17)
 );
 
 -- ── moments (private journey entries) ───────────────────────────────────────

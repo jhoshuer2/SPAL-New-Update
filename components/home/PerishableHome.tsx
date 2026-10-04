@@ -63,7 +63,7 @@ function dishIcon(name: string) {
 // Perishable / prepared-goods dashboard: restaurants (food_seller) and bars
 // (bar_owner). Sells from the menu; ingredients/stock live under Inventory.
 // The retail dashboard lives in RetailHome.tsx (see PERISHABLE_DASHBOARD.md).
-export function PerishableHome() {
+export function PerishableHome({ slot }: { slot?: React.ReactNode } = {}) {
   const router = useRouter();
   const { user, activeBusiness, recordSavedAt } = useSPALStore();
   const name = activeBusiness?.business_name ?? user?.business_name ?? user?.full_name ?? "there";
@@ -185,6 +185,7 @@ export function PerishableHome() {
     <div className="min-h-full pb-nav" style={{ background: BG, fontFamily: FF }}>
       {/* Header */}
       <AppHeader />
+      {slot}
 
       {/* Period tabs */}
       <div className="px-5 mt-5">

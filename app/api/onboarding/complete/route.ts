@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
         completed_at: m.level < level ? new Date().toISOString() : null,
         completed_by: m.level < level ? "placement" : null,
       }));
-      await supabase.from("user_milestones").upsert(rows, { onConflict: "user_id,business_id,milestone_id", ignoreDuplicates: true });
+      await supabase.from("user_milestones").upsert(rows, { onConflict: "user_id,milestone_id", ignoreDuplicates: true });
     }
 
     await supabase.from("users").update({

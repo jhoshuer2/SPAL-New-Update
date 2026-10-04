@@ -3,30 +3,30 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home01Icon, ShoppingCartAdd01Icon, PackageIcon, Wallet01Icon, User02Icon, Hamburger01Icon, MenuRestaurantIcon } from "hugeicons-react";
+import { Home01Icon, Route01Icon, ShoppingCartAdd01Icon, PackageIcon, Wallet01Icon, Hamburger01Icon, MenuRestaurantIcon } from "hugeicons-react";
 import { useBusinessMode } from "@/hooks/useBusinessMode";
 
 const FF = "var(--font-satoshi)";
 
 const TABS = [
   { href: "/home",              label: "Home",    Icon: Home01Icon },
+  { href: "/journey",           label: "Journey", Icon: Route01Icon },
   { href: "/sell",              label: "Sell",    Icon: ShoppingCartAdd01Icon },
   { href: "/inventory",         label: "Inventory", Icon: PackageIcon },
   { href: "/wallet",            label: "Wallet",  Icon: Wallet01Icon },
-  { href: "/profile",           label: "Profile", Icon: User02Icon },
-];
+];  // Profile ("Me") opens from the avatar on Home, per the spec.
 
 // Restaurants and bars: orders come from the menu, stock is ingredients/drinks.
 const PERISHABLE_TABS = [
   { href: "/home",      label: "Home",      Icon: Home01Icon },
+  { href: "/journey",   label: "Journey",   Icon: Route01Icon },
   { href: "/orders",    label: "Orders",    Icon: Hamburger01Icon },
   { href: "/menu",      label: "Menu",      Icon: MenuRestaurantIcon },
   { href: "/inventory", label: "Ingredients", Icon: PackageIcon },
-  { href: "/profile",   label: "Profile",   Icon: User02Icon },
 ];
 
 // Full-screen flows where the tab bar should not show.
-const HIDDEN = ["/ask", "/set-goals", "/records", "/picture", "/voice", "/confirm", "/scan", "/billing", "/inventory/add", "/menu/add", "/orders/new", "/profile/", "/insights"];
+const HIDDEN = ["/ask", "/set-goals", "/records", "/picture", "/voice", "/confirm", "/scan", "/billing", "/inventory/add", "/menu/add", "/orders/new", "/profile/", "/insights", "/journey/milestone", "/journey/moment", "/level-up"];
 
 const isTextField = (el: EventTarget | null) =>
   el instanceof HTMLElement && (el.matches("input:not([type=checkbox]):not([type=radio]):not([type=file]), textarea, select") || el.isContentEditable);

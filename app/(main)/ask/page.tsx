@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -28,7 +29,9 @@ export default function AskPage() {
 function AskInner() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [input, setInput] = useState("");
+  // `?prompt=` pre-fills the box (used by "Ask Spal for help" on milestones). The user still presses send.
+  const initialPrompt = useSearchParams().get("prompt") ?? "";
+  const [input, setInput] = useState(initialPrompt);
   const [sending, setSending] = useState(false);
   const [recording, setRecording] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

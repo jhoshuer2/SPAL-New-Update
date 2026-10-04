@@ -11,4 +11,7 @@
 | 2026-10-04 | Use the existing Spal design system (navy + green, sage canvas, Satoshi/Inter Tight, geometric symbols) instead of the spec §5 lime tokens | Spec §5: Joshua's own design system overrides the placeholder tokens. Lime accent from the spec sketch is not used. |
 | 2026-10-04 | Onboarding B01–B10 is one route (`/meet-spal`) with a step machine, not ten routes | Smoother transitions, shared state, resumable later. Screen IDs kept as `data-testid=screen-Bxx`. |
 | 2026-10-04 | Existing users keep `onboarding_completed`; `onboarding_completed_at` stays null so they can be offered placement once | Never force live users back through full onboarding. |
+| 2026-10-04 | Data-driven milestones are evaluated lazily whenever the journey loads, not by DB trigger + nightly job | Simplest thing that works on Vercel; idempotent. Add the nightly backstop when crons are reviewed. |
+| 2026-10-04 | Bottom nav: Home · Journey · Sell · Inventory · Wallet (Profile via avatar) | Spec §6.1 puts Me behind the avatar; keeps five tabs for live users' existing features. Full spec tabs (Spal centre, Community) arrive with those features. |
+| 2026-10-04 | user_milestones is unique per (user, milestone), not per business | Nullable business_id broke upsert uniqueness; business scoping returns with F17. |
 | OPEN | Voice: Claude has no speech-to-text or text-to-speech. Whisper/TTS routes need a replacement provider or to keep OpenAI for audio only | Spec §19 #8 |
