@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Audio only: Claude has no speech models. Lazy so builds work without the key.
+const openai = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // POST /api/ai/transcribe — audio blob → text via Whisper
 // Expects FormData with an "audio" field (Blob/File)
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Recording too long. Please keep it under 2 minutes." }, { status: 400 });
     }
 
-    const transcription = await openai.audio.transcriptions.create({
+    const transcription = await openai().audio.transcriptions.create({
       file: audioFile,
       model: "whisper-1",
       // Language hint for Nigerian English / code-switching

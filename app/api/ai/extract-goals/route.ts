@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+import { askJSON, MODEL_FAST } from "@/lib/ai/claude";
 
 const SYSTEM_PROMPT = `You are SPAL, a friendly business coach for small business owners in Africa (food sellers, market traders, salon owners, fashion vendors, kiosk owners).
 
@@ -30,21 +28,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Transcript required" }, { status: 400 });
     }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: transcript },
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.3,
-      max_tokens: 700,
+    const parsed = await askJSON<{ goals?: { title?: string; breakdowns?: string[] }[] }>({
+      model: MODEL_FAST(),
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: transcript }],
+      maxTokens: 1500,
     });
-
-    const raw = completion.choices[0]?.message?.content ?? "{}";
-    const parsed = JSON.parse(raw) as {
-      goals?: { title?: string; breakdowns?: string[] }[];
-    };
 
     const goals = (parsed.goals ?? [])
       .filter((g) => g.title?.trim())

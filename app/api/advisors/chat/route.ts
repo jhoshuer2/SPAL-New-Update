@@ -3,10 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdvisor } from "@/lib/advisors/config";
 import { isProUser } from "@/lib/paywall/isPro";
 import { checkAndAwardBadges } from "@/lib/gamification/badges";
-import OpenAI from "openai";
+import { askText } from "@/lib/ai/claude";
 import type { Badge } from "@/lib/gamification/badges";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,24 +47,18 @@ export async function POST(req: NextRequest) {
       if (existing) history = existing.messages ?? [];
     }
 
-    // Build messages for OpenAI
+    // Build messages
     const historyMessages = history.slice(-12).map((m) => ({
       role: m.role as "user" | "assistant",
       content: m.content,
     }));
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: advisor.systemPrompt },
-        ...historyMessages,
-        { role: "user", content: message.trim() },
-      ],
-      temperature: 0.75,
-      max_tokens: 300,
-    });
-
-    const reply = response.choices[0]?.message?.content ?? "Sorry, I could not respond. Please try again.";
+    const reply =
+      (await askText({
+        system: advisor.systemPrompt,
+        messages: [...historyMessages, { role: "user", content: message.trim() }],
+        maxTokens: 1500,
+      })) || "Sorry, I could not respond. Please try again.";
 
     // Update conversation
     const updatedMessages = [

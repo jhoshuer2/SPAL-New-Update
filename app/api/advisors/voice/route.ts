@@ -2,7 +2,7 @@
  * POST /api/advisors/voice
  * Full voice conversation pipeline in one round-trip:
  *   1. Whisper — transcribe user audio
- *   2. GPT-4o-mini — generate advisor reply
+ *   2. Claude — generate advisor reply
  *   3. OpenAI TTS — convert reply to speech
  * Returns: { userText, replyText, audioBase64, conversationId }
  */
@@ -13,8 +13,10 @@ import { isProUser } from "@/lib/paywall/isPro";
 import { checkAndAwardBadges } from "@/lib/gamification/badges";
 import type { Badge } from "@/lib/gamification/badges";
 import OpenAI from "openai";
+import { askText } from "@/lib/ai/claude";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Audio only (Whisper + TTS): Claude has no speech models. Pending provider decision (docs/DECISIONS.md).
+const openai = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Each advisor has a distinct TTS voice
 const VOICE_MAP: Record<string, "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer"> = {
@@ -55,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 1. Transcribe ─────────────────────────────────────────────────────────
-    const transcription = await openai.audio.transcriptions.create({
+    const transcription = await openai().audio.transcriptions.create({
       model: "whisper-1",
       file:  audio,
       response_format: "text",
@@ -88,32 +90,22 @@ export async function POST(req: NextRequest) {
       content: m.content,
     }));
 
-    const chatRes = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          // Append voice-specific instruction: shorter replies, conversational tone
-          content: advisor.systemPrompt +
-            "\n\nIMPORTANT: You are speaking out loud — the user hears you, not reads you. " +
-            "Keep replies SHORT (2-3 sentences max). No bullet points or lists. " +
-            "NEVER start by introducing yourself or saying your name/title — the user already knows who you are. " +
-            "Jump straight into your response. Speak naturally like you're mid-conversation.",
-        },
-        ...historyMsgs,
-        { role: "user", content: userText },
-      ],
-      temperature: 0.8,
-      max_tokens:  180,
-    });
-
-    const replyText = chatRes.choices[0]?.message?.content ??
-      "Sorry, I couldn't respond right now. Please try again.";
+    const replyText =
+      (await askText({
+        system: advisor.systemPrompt +
+          // Voice-specific instruction: shorter replies, conversational tone
+          "\n\nIMPORTANT: You are speaking out loud — the user hears you, not reads you. " +
+          "Keep replies SHORT (2-3 sentences max). No bullet points or lists. " +
+          "NEVER start by introducing yourself or saying your name/title — the user already knows who you are. " +
+          "Jump straight into your response. Speak naturally like you're mid-conversation.",
+        messages: [...historyMsgs, { role: "user", content: userText }],
+        maxTokens: 1000,
+      })) || "Sorry, I couldn't respond right now. Please try again.";
 
     // ── 4. TTS — convert reply to speech ─────────────────────────────────────
     const voice = VOICE_MAP[advisorId] ?? "alloy";
 
-    const ttsRes = await openai.audio.speech.create({
+    const ttsRes = await openai().audio.speech.create({
       model: "tts-1-hd",   // higher quality, more natural
       voice,
       input: replyText,

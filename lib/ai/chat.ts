@@ -1,7 +1,7 @@
 /**
- * SPAL OpenAI functions — GPT-4o calls
+ * SPAL AI functions — Claude calls (server-side only)
  */
-import OpenAI from "openai";
+import { askText, askJSON, imageBlock, MODEL_FAST, MODEL_MAIN } from "./claude";
 import {
   PARSE_RECORD_PROMPT,
   IMPORT_RECORDS_PROMPT,
@@ -11,25 +11,17 @@ import {
 import type { ChatMessage } from "@/lib/types";
 import { normalizeCategory } from "@/lib/utils/category";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // ─── Parse records from natural language ──────────────────────────────────────
 export async function parseRecordsFromText(text: string): Promise<
   Array<{ type: "sale" | "expense"; qty: number; unit_price: number; amount: number; description: string; category: string; payment_status: "paid" | "owing"; customer_name: string | null }>
 > {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: PARSE_RECORD_PROMPT },
-      { role: "user",   content: text },
-    ],
-    response_format: { type: "json_object" },
-    temperature: 0.1,
-    max_tokens: 500,
+  const parsed = await askJSON<{ records?: Awaited<ReturnType<typeof parseRecordsFromText>> }>({
+    model: MODEL_FAST(),
+    system: PARSE_RECORD_PROMPT,
+    messages: [{ role: "user", content: text }],
+    maxTokens: 1500,
   });
-
-  const content = response.choices[0]?.message?.content ?? "{}";
-  const parsed  = JSON.parse(content);
   return parsed.records ?? [];
 }
 
@@ -46,45 +38,29 @@ export interface ImportedRecord {
 }
 
 export async function parseImportFromText(text: string): Promise<ImportedRecord[]> {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: IMPORT_RECORDS_PROMPT },
-      { role: "user",   content: text },
-    ],
-    response_format: { type: "json_object" },
-    temperature: 0.1,
-    max_tokens: 2000,
+  const parsed = await askJSON<{ records?: ImportedRecord[] }>({
+    model: MODEL_FAST(),
+    system: IMPORT_RECORDS_PROMPT,
+    messages: [{ role: "user", content: text }],
+    maxTokens: 4000,
   });
-  const content = response.choices[0]?.message?.content ?? "{}";
-  return (JSON.parse(content).records ?? []) as ImportedRecord[];
+  return parsed.records ?? [];
 }
 
 export async function parseImportFromImage(base64: string, mimeType: string): Promise<ImportedRecord[]> {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      { role: "system", content: IMPORT_RECORDS_PROMPT },
-      {
-        role: "user",
-        content: [
-          {
-            type: "image_url",
-            image_url: { url: `data:${mimeType};base64,${base64}`, detail: "high" },
-          },
-          {
-            type: "text",
-            text: "Read all the records from this image and extract them as structured JSON.",
-          },
-        ],
-      },
-    ],
-    response_format: { type: "json_object" },
-    temperature: 0.1,
-    max_tokens: 2000,
+  const parsed = await askJSON<{ records?: ImportedRecord[] }>({
+    model: MODEL_MAIN(),
+    system: IMPORT_RECORDS_PROMPT,
+    messages: [{
+      role: "user",
+      content: [
+        imageBlock({ base64, mimeType }),
+        { type: "text", text: "Read all the records from this image and extract them as structured JSON." },
+      ],
+    }],
+    maxTokens: 4000,
   });
-  const content = response.choices[0]?.message?.content ?? "{}";
-  return (JSON.parse(content).records ?? []) as ImportedRecord[];
+  return parsed.records ?? [];
 }
 
 // ─── Generate daily insight ───────────────────────────────────────────────────
@@ -114,16 +90,11 @@ export async function generateDailyInsight(data: {
     businessGoals: data.businessGoals,
   });
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const result = await askJSON<{ insight?: string; message?: string }>({
+    model: MODEL_FAST(),
     messages: [{ role: "user", content: prompt }],
-    response_format: { type: "json_object" },
-    temperature: 0.7,
-    max_tokens: 200,
+    maxTokens: 600,
   });
-
-  const content = response.choices[0]?.message?.content ?? "{}";
-  const result  = JSON.parse(content);
 
   return {
     insight: result.insight ?? "You tracked your business today. Keep it up!",
@@ -141,23 +112,17 @@ export async function parseReceiptImage(
   description: string;
   category: string;
 }> | null> {
-  const base64   = imageBuffer.toString("base64");
-  const imageUrl = `data:${mimeType};base64,${base64}`;
+  const base64 = imageBuffer.toString("base64");
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            // "high" detail is essential for reading handwritten line-item lists accurately
-            type: "image_url",
-            image_url: { url: imageUrl, detail: "high" },
-          },
-          {
-            type: "text",
-            text: `You are helping a small business owner in Nigeria record their sales and expenses.
+  const parsed = await askJSON<{ items?: unknown[] }>({
+    model: MODEL_MAIN(),
+    messages: [{
+      role: "user",
+      content: [
+        imageBlock({ base64, mimeType }),
+        {
+          type: "text",
+          text: `You are helping a small business owner in Nigeria record their sales and expenses.
 This image may be a receipt, an invoice, or a hand-written list of items with prices.
 
 Read EVERY line and extract EACH item as its own entry — never merge separate lines into one total.
@@ -183,17 +148,11 @@ Rules:
 - Read carefully — hand-written amounts can be faint. Do not skip any line.
 - If the image is truly unreadable or has no prices, return {"items":[]}.
 Do NOT include any text outside the JSON.`,
-          },
-        ],
-      },
-    ],
-    response_format: { type: "json_object" },
-    temperature: 0.1,
-    max_tokens: 1200,
+        },
+      ],
+    }],
+    maxTokens: 3000,
   });
-
-  const content = response.choices[0]?.message?.content ?? "{}";
-  const parsed  = JSON.parse(content);
   const rawItems: unknown[] = Array.isArray(parsed.items) ? parsed.items : [];
 
   const items = rawItems
@@ -261,7 +220,7 @@ export async function askSPAL(data: {
     recentRecords:  data.recentRecords,
   });
 
-  // Convert history to OpenAI messages (last 10 turns)
+  // Convert history to chat messages (last 10 turns)
   const historyMessages = data.history.slice(-10).map(m => ({
     role:    m.role as "user" | "assistant",
     content: m.content,
@@ -273,43 +232,33 @@ export async function askSPAL(data: {
     ? "\n\nIMPORTANT: This answer will be spoken out loud. Reply in 1–2 short sentences, straight to the point. No lists, no markdown, no long explanations."
     : "";
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: systemPrompt + voiceSuffix },
-      ...historyMessages,
-      { role: "user",   content: data.message },
-    ],
-    temperature: 0.7,
-    max_tokens: data.brief ? 130 : 300,
+  const reply = await askText({
+    model: MODEL_MAIN(),
+    system: systemPrompt + voiceSuffix,
+    messages: [...historyMessages, { role: "user", content: data.message }],
+    maxTokens: data.brief ? 1000 : 2000,
+    effort: "low",
   });
-
-  return response.choices[0]?.message?.content ?? "Sorry, I could not answer that. Please try again.";
+  return reply || "Sorry, I could not answer that. Please try again.";
 }
 
 // ─── Vision: read an uploaded image/document and answer in text (OCR + reasoning)
 export async function askVision(data: { message: string; imageUrl: string; currency?: string }): Promise<string> {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are SPAL, a friendly business assistant for small African businesses. " +
-          "Read the attached image or document (receipts, invoices, notes, product photos) using OCR, " +
-          "then answer the user's question in clear, simple English. Amounts are in " +
-          (data.currency ?? "NGN") + ". Keep it short and practical. Never use jargon like revenue, ledger or reconcile.",
-      },
-      {
-        role: "user",
-        content: [
-          { type: "text", text: data.message || "What does this show? Summarise the key details for my business." },
-          { type: "image_url", image_url: { url: data.imageUrl } },
-        ],
-      },
-    ],
-    max_tokens: 600,
-    temperature: 0.3,
+  const reply = await askText({
+    model: MODEL_MAIN(),
+    system:
+      "You are SPAL, a friendly business assistant for small African businesses. " +
+      "Read the attached image or document (receipts, invoices, notes, product photos) using OCR, " +
+      "then answer the user's question in clear, simple English. Amounts are in " +
+      (data.currency ?? "NGN") + ". Keep it short and practical. Never use jargon like revenue, ledger or reconcile.",
+    messages: [{
+      role: "user",
+      content: [
+        imageBlock({ url: data.imageUrl }),
+        { type: "text", text: data.message || "What does this show? Summarise the key details for my business." },
+      ],
+    }],
+    maxTokens: 1500,
   });
-  return response.choices[0]?.message?.content?.trim() ?? "I couldn't read that clearly. Please try a clearer photo.";
+  return reply || "I couldn't read that clearly. Please try a clearer photo.";
 }

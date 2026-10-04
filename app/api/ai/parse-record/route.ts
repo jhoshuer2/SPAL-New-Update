@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { parseRecordsFromText } from "@/lib/openai/chat";
+import { parseRecordsFromText } from "@/lib/ai/chat";
 
 // POST /api/ai/parse-record — parse natural language into structured records
 export async function POST(req: NextRequest) {

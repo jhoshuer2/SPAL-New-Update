@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Audio only: Claude has no speech models. Lazy so builds work without the key.
+const openai = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // POST /api/ai/tts — convert text to speech (returns audio/mpeg stream)
 export async function POST(req: NextRequest) {
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
     const { text } = await req.json();
     if (!text?.trim()) return NextResponse.json({ success: false, error: "text required" }, { status: 400 });
 
-    const mp3 = await openai.audio.speech.create({
+    const mp3 = await openai().audio.speech.create({
       model: "tts-1",
       voice: "nova",        // warm, friendly female voice
       input: text.trim(),

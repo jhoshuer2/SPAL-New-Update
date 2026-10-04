@@ -5,7 +5,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { parseReceiptImage } from "@/lib/openai/chat";
+import { parseReceiptImage } from "@/lib/ai/chat";
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
