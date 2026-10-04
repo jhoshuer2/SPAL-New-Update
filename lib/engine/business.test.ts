@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { applyPayment, dueLabel, dueState, rangeFor, remainingNaira, spalComment, summarize, type Row } from "./business";
-import { budgetGap, defaultLaunchPlan, ideaFallback, launchProgress, validationProgress, waysToClose, type BudgetItem } from "./planning";
+import { budgetGap, defaultLaunchPlan, ideaFallback, launchProgress, tidyOneLiner, validationProgress, waysToClose, type BudgetItem } from "./planning";
 
 const TODAY = "2026-10-07"; // a Wednesday
 const r = (type: "sale" | "expense", amount: number, date: string, extra: Partial<Row> = {}): Row => ({ type, amount, record_date: date, ...extra });
@@ -116,5 +116,16 @@ describe("validation, idea, launch", () => {
     expect(p[p.length - 1].title).toBe("Make your first sale");
     p[0].tasks[0].done = true;
     expect(launchProgress(p)).toMatchObject({ done: 1, total: 12, pct: 8 });
+  });
+});
+
+describe("tidyOneLiner", () => {
+  it("removes a dangling reason and ends with a full stop", () => {
+    expect(tidyOneLiner("I will sell zobo and small chops to office workers on the Island so that")).toBe("I will sell zobo and small chops to office workers on the Island.");
+    expect(tidyOneLiner("I will sell zobo to office workers because ")).toBe("I will sell zobo to office workers.");
+  });
+  it("leaves a complete sentence alone", () => {
+    expect(tidyOneLiner("I will sell zobo to office workers so that they have a quick lunch.")).toBe("I will sell zobo to office workers so that they have a quick lunch.");
+    expect(tidyOneLiner("  ")).toBe("");
   });
 });

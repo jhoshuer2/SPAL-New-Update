@@ -73,3 +73,9 @@ export function launchProgress(weeks: Week[]) {
   const done = all.filter((x) => x.done).length;
   return { done, total: all.length, pct: all.length ? Math.round((done / all.length) * 100) : 0 };
 }
+
+/** The model sometimes leaves "so that" dangling when the reason wasn't given. Trim it so the summary always reads as a sentence. */
+export function tidyOneLiner(text: string): string {
+  const t = text.trim().replace(/\s+(so that|because|in order to)\s*[.,:;]?$/i, "").replace(/[,;:\s]+$/, "");
+  return t && !/[.!?]$/.test(t) ? `${t}.` : t;
+}

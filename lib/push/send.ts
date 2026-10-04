@@ -18,7 +18,9 @@ export interface Sub { user_id: string; endpoint: string; p256dh: string; auth: 
 
 /** Only Vercel Cron (or our server) may trigger a cron route. */
 export function assertCron(req: NextRequest): boolean {
-  return req.headers.get("authorization") === `Bearer ${process.env.CRON_SECRET}`;
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return false; // fail closed: with no secret configured, nobody gets in (not even "Bearer undefined")
+  return req.headers.get("authorization") === `Bearer ${secret}`;
 }
 
 /** All push subscriptions (one user can have several devices). */

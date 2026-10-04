@@ -1,14 +1,14 @@
 // E02 · turn a rough idea into a clear offer. Spal drafts; if AI is unavailable a written fallback keeps the flow moving.
 import { NextRequest, NextResponse } from "next/server";
 import { authed, bad, cleanText, missingTable, notReady, saveFailed, unauthorized } from "@/lib/planning/server";
-import { ideaFallback } from "@/lib/engine/planning";
+import { ideaFallback, tidyOneLiner } from "@/lib/engine/planning";
 import { spalDraft } from "@/lib/ai/spal";
 
 const SYSTEM = `You help a Nigerian would-be entrepreneur turn a rough idea into a clear offer.
 Return JSON: {"summary": {"oneLiner": string, "customer": string, "offer": string, "why": string}, "questions": [string, string, string], "alternatives": [string, string]}
-- oneLiner: one plain sentence, "I will sell X to Y so that Z".
+- oneLiner: one plain sentence, "I will sell X to Y so that Z". If they didn't say why (Z), leave out the "so that" part entirely. Never end with "so that".
 - customer, offer, why: one short sentence each, using only what they told you. If they did not say, leave the string empty.
-- questions: up to 3 clarifying questions that would sharpen the idea. One idea per question.
+- questions: up to 3 clarifying questions that would sharpen the idea. One idea per question, each under 15 words.
 - alternatives: up to 2 other angles worth considering (a different customer or a simpler first version). Not new businesses.`;
 
 export async function POST(req: NextRequest) {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   const fb = ideaFallback(text);
   const s = drafted?.summary ?? {};
   const summary = {
-    oneLiner: cleanText(s.oneLiner, 200) || fb.summary.oneLiner,
+    oneLiner: tidyOneLiner(cleanText(s.oneLiner, 200)) || fb.summary.oneLiner,
     customer: cleanText(s.customer, 200),
     offer: cleanText(s.offer, 200),
     why: cleanText(s.why, 200),

@@ -18,8 +18,15 @@ export async function sendOTPviaEmail(
 ): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
 
-  // ── DEV MODE: no API key — just log to console ────────────────────────────
+  // ── No API key ──────────────────────────────────────────────────────────────
   if (!apiKey) {
+    // In production this must FAIL: pretending the email was sent leaves people waiting for a code that never
+    // arrives, and printing the code would put one-time codes in the server logs.
+    if (process.env.NODE_ENV === "production") {
+      console.error("[send-otp] RESEND_API_KEY is not set: cannot send verification emails.");
+      return { success: false, error: "We can't send verification emails right now. Please try again later." };
+    }
+    // Local development only: show the code in the terminal.
     console.log("\n────────────────────────────────────────");
     console.log(`  [SPAL DEV] OTP for ${email}: ${otp}`);
     console.log("────────────────────────────────────────\n");
@@ -38,7 +45,7 @@ export async function sendOTPviaEmail(
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from:    "SPAL <hello@spal.ng>",
+        from:    process.env.EMAIL_FROM || "SPAL <hello@spal.ng>", // must be on a domain verified in Resend
         to:      email,
         subject: `${otp} — your SPAL verification code`,
         html: `
