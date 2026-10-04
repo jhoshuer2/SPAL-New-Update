@@ -28,5 +28,6 @@
       "path": "/api/cron/reminders?job=evening",
       "schedule": "0 17 * * *"
     }
-  ]
+  ],
+  "outputDirectory": ".next"
 }
