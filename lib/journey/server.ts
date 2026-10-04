@@ -3,6 +3,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { evaluateRule, levelProgress, levelUpReady, type MilestoneState, type MilestoneDef, type LevelProgress } from "@/lib/engine/milestones";
 import type { Level } from "@/lib/engine/placement";
+import { notify } from "@/lib/notify";
 
 export type JourneyData = {
   ready: true;
@@ -73,6 +74,10 @@ export async function loadJourney(supabase: SupabaseClient, userId: string): Pro
     await supabase.from("moments").insert(
       toComplete.map((m) => ({ user_id: userId, kind: "auto", type: m.key === "l0_first_sale" ? "first_sale" : "milestone", text: m.key === "l0_first_sale" ? "Made your first sale" : `Milestone done: ${m.title}`, occurred_on: today })),
     );
+    for (const m of toComplete) {
+      await notify(userId, "milestone_done", { title: m.title });
+      if (m.is_gateway && level < 5) await notify(userId, "level_up_ready", { level: level + 1 });
+    }
     milestones = milestones.map((m) => (toComplete.includes(m) ? { ...m, status: "done" as const, completed_at: now } : m));
   }
 

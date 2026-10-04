@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { canCompleteManually, type MilestoneDef } from "@/lib/engine/milestones";
 import type { Level } from "@/lib/engine/placement";
+import { notify } from "@/lib/notify";
 
 export async function POST(req: NextRequest, ctx: { params: Promise<{ key: string }> }) {
   const { key } = await ctx.params;
@@ -35,6 +36,10 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ key: strin
 
   if (done) {
     await supabase.from("moments").insert({ user_id: user.id, business_id: businessId, kind: "auto", type: def.key === "l1_register_business" ? "registered" : "milestone", text: `Milestone done: ${def.title}` });
+  }
+  if (done) {
+    await notify(user.id, "milestone_done", { title: def.title });
+    if (def.is_gateway && level < 5) await notify(user.id, "level_up_ready", { level: level + 1 });
   }
   return NextResponse.json({ success: true, data: { key, done, gateway: !!def.is_gateway && done } });
 }
