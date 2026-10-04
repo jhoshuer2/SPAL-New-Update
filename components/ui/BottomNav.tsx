@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home01Icon, Route01Icon, AiBrain01Icon, ShoppingCartAdd01Icon, PackageIcon, Hamburger01Icon, MenuRestaurantIcon } from "hugeicons-react";
+import { Home01Icon, Route01Icon, AiBrain01Icon, ShoppingCartAdd01Icon, Briefcase01Icon, Hamburger01Icon, MenuRestaurantIcon } from "hugeicons-react";
 import { useBusinessMode } from "@/hooks/useBusinessMode";
 
 const FF = "var(--font-satoshi)";
@@ -13,8 +13,8 @@ const TABS = [
   { href: "/journey",           label: "Journey", Icon: Route01Icon },
   { href: "/spal",              label: "Spal",    Icon: AiBrain01Icon },
   { href: "/sell",              label: "Sell",    Icon: ShoppingCartAdd01Icon },
-  { href: "/inventory",         label: "Inventory", Icon: PackageIcon },
-];  // Wallet moved to the profile menu; Me opens from the avatar on Home.  // Profile ("Me") opens from the avatar on Home, per the spec.
+  { href: "/business",          label: "Business", Icon: Briefcase01Icon },
+];  // Inventory and Wallet moved to the profile menu; Me opens from the avatar on Home.  // Profile ("Me") opens from the avatar on Home, per the spec.
 
 // Restaurants and bars: orders come from the menu, stock is ingredients/drinks.
 const PERISHABLE_TABS = [
@@ -26,7 +26,7 @@ const PERISHABLE_TABS = [
 ];  // Ingredients (inventory) stays reachable from Home and Menu.
 
 // Full-screen flows where the tab bar should not show.
-const HIDDEN = ["/ask", "/set-goals", "/records", "/picture", "/voice", "/confirm", "/scan", "/billing", "/inventory/add", "/menu/add", "/orders/new", "/profile/", "/insights", "/journey/milestone", "/journey/moment", "/level-up", "/check-in", "/spal/memory"];
+const HIDDEN = ["/ask", "/set-goals", "/records", "/picture", "/voice", "/confirm", "/scan", "/billing", "/inventory/add", "/menu/add", "/orders/new", "/profile/", "/insights", "/journey/milestone", "/journey/moment", "/level-up", "/check-in", "/spal/memory", "/business/sales/new", "/business/expenses/new", "/business/planning/", "/business/profile"];
 
 const isTextField = (el: EventTarget | null) =>
   el instanceof HTMLElement && (el.matches("input:not([type=checkbox]):not([type=radio]):not([type=file]), textarea, select") || el.isContentEditable);

@@ -60,3 +60,24 @@ export async function extractMemory(userId: string, userMessage: string, spalRep
     return error ? 0 : fresh.length;
   } catch { return 0; }
 }
+
+// ── spal-draft: structured drafting for the planning studio (spec §9.2) ───────
+import { overBudget } from "./usage";
+
+/** Ask Claude for a JSON draft. Returns null when over budget, refused, unparsable or unavailable, so callers fall back. */
+export async function spalDraft<T>(userId: string, system: string, content: string, language: "en" | "pcm" = "en"): Promise<T | null> {
+  if (!process.env.ANTHROPIC_API_KEY || (await overBudget(userId))) return null;
+  try {
+    const out = await askTextFull({
+      model: MODEL_MAIN(),
+      system: `${system}\nWrite in ${language === "pcm" ? "light Nigerian Pidgin" : "plain, warm English"}. Short and concrete. Never invent facts the user didn't give. Return ONLY one JSON object.`,
+      messages: [{ role: "user", content }],
+      maxTokens: 3000,
+      effort: "low",
+    });
+    await recordUsage(userId, "spal-draft", out.usage);
+    if (out.refused || !out.text) return null;
+    const json = extractJSON<T>(out.text);
+    return Object.keys(json as object).length ? json : null;
+  } catch { return null; }
+}

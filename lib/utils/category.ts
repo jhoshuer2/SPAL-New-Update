@@ -20,6 +20,8 @@ export const EXPENSE_CATEGORIES = [
   "Rent",
   "Salary",
   "Utilities",
+  "Marketing",
+  "Equipment",
   "Other",
 ] as const;
 
@@ -108,6 +110,19 @@ const SYNONYM_MAP: Record<string, string> = {
   "light":            "Utilities",
   "nepa":             "Utilities",
   "phcn":             "Utilities",
+
+  // Marketing / equipment (added with the money-capture screens)
+  "airtime":          "Utilities",
+  "data bundle":      "Utilities",
+  "advert":           "Marketing",
+  "adverts":          "Marketing",
+  "ads":              "Marketing",
+  "advertising":      "Marketing",
+  "promotion":        "Marketing",
+  "tools":            "Equipment",
+  "machine":          "Equipment",
+  "machinery":        "Equipment",
+  "tool":             "Equipment",
 
   // Catch-all for generic/default values
   "sales":            "Other",

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
 const ITEMS = [
-  { label: "Sale", hint: "Record money in", href: "/records/add-sale" },
-  { label: "Expense", hint: "Record money out", href: "/records/add-expense" },
+  { label: "Sale", hint: "Record money in", href: "/business/sales/new" },
+  { label: "Expense", hint: "Record money out", href: "/business/expenses/new" },
   { label: "Moment", hint: "A win, lesson or hard day", href: "/journey/moment/new" },
   { label: "Milestone done", hint: "Tick something off", href: "/journey" },
   { label: "Goal", hint: "Set or check a goal", href: "/goals" },

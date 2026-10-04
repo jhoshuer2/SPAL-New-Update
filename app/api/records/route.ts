@@ -36,8 +36,10 @@ export async function GET(req: NextRequest) {
     if (endDate)   query = query.lte("record_date", endDate);
     if (type)      query = query.eq("type", type);
 
-    const { data, error } = await query;
+    const { data: rows, error } = await query;
     if (error) throw error;
+    // Personal spending is not business spending (F06). Filtered here, not in SQL, so this also works before migration 027.
+    const data = searchParams.get("include_personal") ? rows : (rows ?? []).filter((r: { is_personal?: boolean | null }) => !r.is_personal);
 
     return NextResponse.json({ success: true, data });
   } catch (err) {
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const { type, amount, description, category, preserve_category, input_method, raw_input, record_date, payment_status, customer_name } = body;
+    const { type, amount, description, category, preserve_category, input_method, raw_input, record_date, payment_status, customer_name, payment_method, due_on, client_id, is_personal } = body;
 
     if (!type || !amount) {
       return NextResponse.json({ success: false, error: "type and amount are required" }, { status: 400 });
@@ -66,23 +68,41 @@ export async function POST(req: NextRequest) {
     // everything else is normalized to the canonical set.
     const finalCategory = preserve_category ? (category?.trim() || null) : normalizeCategory(category);
 
-    const { data, error } = await supabase
-      .from("records")
-      .insert({
-        user_id: user.id,
-        business_id: bizId ?? undefined,
-        type,
-        amount: parseFloat(amount),
-        description: description?.trim() || null,
-        category: finalCategory,
-        input_method: input_method || "text",
-        raw_input: raw_input || null,
-        record_date: record_date || todayISO(),
-        payment_status: payment_status ?? "paid",
-        customer_name: customer_name?.trim() || null,
-      })
-      .select()
-      .single();
+    // Offline capture sends a client_id so a retried request never creates a second record (spec §11).
+    if (client_id) {
+      const dup = await supabase.from("records").select("*").eq("user_id", user.id).eq("client_id", client_id).maybeSingle();
+      if (dup.data) return NextResponse.json({ success: true, data: dup.data, newBadges: [], duplicate: true });
+    }
+
+    const base = {
+      user_id: user.id,
+      business_id: bizId ?? undefined,
+      type,
+      amount: parseFloat(amount),
+      description: description?.trim() || null,
+      category: finalCategory,
+      input_method: input_method || "text",
+      raw_input: raw_input || null,
+      record_date: record_date || todayISO(),
+      payment_status: payment_status ?? "paid",
+      customer_name: customer_name?.trim() || null,
+    };
+    // Columns added by migration 027. Sent only when given; if the column isn't there yet, the record still saves without them.
+    const extras: Record<string, unknown> = {};
+    if (payment_method && ["cash", "transfer", "pos", "credit"].includes(payment_method)) extras.payment_method = payment_method;
+    if (due_on && /^\d{4}-\d{2}-\d{2}$/.test(due_on)) extras.due_on = due_on;
+    if (client_id) extras.client_id = client_id;
+    if (is_personal === true) extras.is_personal = true;
+
+    let ins = await supabase.from("records").insert({ ...base, ...extras }).select().single();
+    // A personal expense must never be saved as a business one, so that case is not retried without its flag.
+    if (ins.error && extras.is_personal && (ins.error.code === "42703" || ins.error.code === "PGRST204" || /column .* does not exist|schema cache/i.test(ins.error.message))) {
+      return NextResponse.json({ success: false, error: "Personal spending isn't available yet. It will be soon." }, { status: 503 });
+    }
+    if (ins.error && Object.keys(extras).length && (ins.error.code === "42703" || ins.error.code === "PGRST204" || /column .* does not exist|schema cache/i.test(ins.error.message))) {
+      ins = await supabase.from("records").insert(base).select().single();
+    }
+    const { data, error } = ins;
 
     if (error) throw error;
 

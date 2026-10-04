@@ -47,3 +47,19 @@
 - [ ] Not verified: real model output (Anthropic account has no credit), real Supabase
 - [ ] Not built: streaming replies, Brainstorm/Challenge (V1), Voice (Later), Pidgin eval fixtures (spec §9.7), daily check-in push scheduling, `spal-nudge` AI line (templated for now)
 - [ ] Distress handling relies on the prompt; helpline content record (flagged "verify") still to add
+
+## Phase 1c · Planning and money (built; verified with mocked data and a real browser for offline)
+- [x] E01–E04, E06: planning hub, idea (Spal drafts, written fallback), validation (log 5 conversations, checklist, recap), startup budget (gap and ways to close it), launch plan (ticks autosave, ends at first sale)
+- [x] F01 Business overview (period, money in/out/profit, trend, top sellers, how people paid, Spal line); Level 0 opens Planning instead
+- [x] F03 add sale and F06 add expense: type it ("sold 3 cartons for 45k"), payment method incl. "Will pay later" (creates a debt), personal flag
+- [x] F13 debts: owed to me (part payments, mark paid, due dates) and I owe
+- [x] F16 business profile (name, logo, address, CAC, TIN, bank for display, socials)
+- [x] Offline outbox (spec §11): save on the phone first, sync on reconnect, idempotent via client_id; banner + "sync now"; rejected items parked, never lost
+- [x] Migration 027 (additive, idempotent, down path) + access-rule test verified on local Postgres, including that it fails when security is off
+- [x] 82 tests
+- [ ] F02/F04/F05/F07 (sales and expense lists and details): the existing `/records` screens still serve these, linked from Business
+- [ ] Receipt photo on F06; voice entry on F03 (existing legacy voice/picture flows remain available)
+- [ ] Due-date and launch-task reminders need a scheduler (push exists; cron to add)
+- [ ] Part payments are not reflected in the legacy "Outstanding debt" tile (it counts the full sale until fully paid)
+- [ ] Overview aggregates in the API, not in a SQL view/RPC yet (fine to ~10k rows per range)
+- [ ] Not verified against a real Supabase or a live model (planning drafts fall back to written text without AI credit)

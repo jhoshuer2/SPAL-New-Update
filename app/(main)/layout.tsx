@@ -3,6 +3,7 @@ import { VoiceRecorder } from "@/components/voice/VoiceRecorder";
 import { BadgeCelebration } from "@/components/gamification/BadgeCelebration";
 import { PWAInstallPrompt } from "@/components/shared/PWAInstallPrompt";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { SyncStatus } from "@/components/shared/SyncStatus";
 
 export default function MainLayout({
   children,
@@ -12,6 +13,7 @@ export default function MainLayout({
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <UserHydration />
+      <SyncStatus />
       {/*
         flex-1 + overflow-y-auto = scrollable content area.
         pb-shell = home-indicator inset, only when the bottom bar is hidden.
