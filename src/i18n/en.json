@@ -1,0 +1,5 @@
+{
+  "splash": { "tagline": "Every stage of your business" },
+  "common": { "continue": "Continue", "retry": "Try again", "loading": "Loading" },
+  "dev": { "title": "Component preview" }
+}
