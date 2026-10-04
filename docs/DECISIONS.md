@@ -24,4 +24,12 @@
 | 2026-10-04 | Offline: IndexedDB outbox + client_id idempotency on `/api/records`; the server retries without new columns only if safe | Works without network and before migration 027 is live. |
 | 2026-10-04 | Nav: Home, Journey, Spal, Sell, Business (retail). Inventory and Wallet in the profile menu and Business page; restaurants keep Orders/Menu and reach Business from profile | Spec §6.1: Business is a tab; existing features stay reachable. |
 | 2026-10-04 | Quick sale parsing runs on the device (no AI) | Instant, free, works offline. |
+| 2026-10-04 | Community reads go through `*_public` views; base tables are own-rows-only. Views null the author of anonymous content | Spec §7.10: privacy enforced at the database. Anonymous authors are stored for moderation but never reach a client. |
+| 2026-10-04 | Everyone's `profile_visibility` starts as `hidden`; posting under your name asks consent first | Principle 3 (private by default). Live users never opted in to being seen. |
+| 2026-10-04 | Blocking an anonymous author works (server resolves the author) but blocked people are never listed by name or id; only a count and "unblock all" | A list of names would unmask anonymous authors. |
+| 2026-10-04 | Phase 1 posts are public only; connections-only and circle audiences are in the schema but rejected until those features exist | Avoids a half-built audience model. |
+| 2026-10-04 | App lock is a PIN on the web version (fingerprint/face needs the native app) | Honest about what a PWA can do; PIN is salted PBKDF2, never leaves the device. |
+| 2026-10-04 | Purge of deleted accounts is built and tested but not scheduled | Irreversible. Run by hand on staging first, then add to vercel.json. |
+| 2026-10-04 | Reminder crons: morning (debts, Monday launch nudge) and evening (check-in) rather than per-user times | Vercel cron is fixed-time; per-user times need a more frequent job. |
+| 2026-10-04 | Community is reached from Home (a post from your level), Journey and Me, not a bottom tab yet | Five tabs are full (Home, Journey, Spal, Sell, Business). Joshua to decide whether Community replaces one. |
 | OPEN | Voice: Claude has no speech-to-text or text-to-speech. Whisper/TTS routes need a replacement provider or to keep OpenAI for audio only | Spec §19 #8 |

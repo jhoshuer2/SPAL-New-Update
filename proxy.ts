@@ -51,7 +51,10 @@ export async function proxy(req: NextRequest) {
 
   // Protect /home, /records, /insights, /learn, /profile, /ask
   const protectedPaths = ["/home", "/records", "/insights", "/learn", "/profile", "/ask", "/goals", "/upgrade", "/notifications", "/billing"];
-  if (protectedPaths.some(p => pathname.startsWith(p)) && !user) {
+  // Newer areas match the exact path or a sub-path only, so /me does not catch /menu or /meet-spal.
+  const signedInAreas = ["/me", "/community", "/business", "/journey", "/spal", "/check-in", "/level-up"];
+  const inSignedInArea = signedInAreas.some(p => pathname === p || pathname.startsWith(p + "/"));
+  if ((protectedPaths.some(p => pathname.startsWith(p)) || inSignedInArea) && !user) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

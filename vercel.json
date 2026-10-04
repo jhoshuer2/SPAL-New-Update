@@ -1,8 +1,28 @@
 {
   "crons": [
-    { "path": "/api/cron/daily-reminder", "schedule": "0 11 * * *" },
-    { "path": "/api/cron/sales-summary", "schedule": "0 20 * * *" },
-    { "path": "/api/cron/insight-summary", "schedule": "0 17 * * 0" },
-    { "path": "/api/cron/quote", "schedule": "0 8 * * *" }
+    {
+      "path": "/api/cron/daily-reminder",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/sales-summary",
+      "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/cron/insight-summary",
+      "schedule": "0 17 * * 0"
+    },
+    {
+      "path": "/api/cron/quote",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/reminders?job=morning",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/reminders?job=evening",
+      "schedule": "0 17 * * *"
+    }
   ]
 }

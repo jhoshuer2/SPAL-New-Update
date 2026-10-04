@@ -21,8 +21,8 @@ export function scanPrivate(text: string): Finding[] {
   collect(text, /[\w.+-]+@[\w-]+\.[\w.-]+/g, "email", found);
   collect(text, /\b\d{10}\b/g, "account", found, (m) => !found.some((f) => f.kind === "phone" && m.index! >= f.start && m.index! < f.end));
   // Money: currency marker, comma-grouped thousands, or k/m next to a money word
-  collect(text, new RegExp(String.raw`(?:₦|\bNGN\s?|\bN(?=\d))\s?${NUM}\s?(?:k|m|million|thousand)?\b`, "gi"), "amount", found);
-  collect(text, new RegExp(String.raw`\b${NUM}\s?(?:k|m|million|thousand)?\s?(?:naira|ngn)\b`, "gi"), "amount", found);
+  collect(text, new RegExp(String.raw`(?:₦|\bNGN\s?|\bN(?=\d))\s?${NUM}(?:\s?(?:k|m|million|thousand))?\b`, "gi"), "amount", found);
+  collect(text, new RegExp(String.raw`\b${NUM}(?:\s?(?:k|m|million|thousand))?\s?(?:naira|ngn)\b`, "gi"), "amount", found);
   collect(text, /\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\b/g, "amount", found);
   collect(text, /\b\d+(?:\.\d+)?\s?(?:k|m)\b/gi, "amount", found, (m) => {
     const around = text.slice(Math.max(0, m.index! - 25), m.index! + m[0].length + 25);
@@ -47,3 +47,9 @@ export function redact(text: string, findings: Finding[]): string {
 }
 
 export const KIND_LABEL: Record<Finding["kind"], string> = { amount: "an amount of money", phone: "a phone number", account: "what looks like an account number", email: "an email address" };
+
+/** "an amount of money", "an amount of money and a phone number", "a, b and c". */
+export function describeFindings(findings: Finding[]): string {
+  const parts = [...new Set(findings.map((f) => KIND_LABEL[f.kind]))];
+  return parts.length <= 1 ? parts[0] ?? "" : `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
+}

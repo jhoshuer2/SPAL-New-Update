@@ -59,3 +59,26 @@ export function shouldPush(o: { key: NotifKey; prefs?: Prefs; hardSeason: boolea
   if (o.hardSeason && (o.key === "spal_nudge" || o.key === "reaction_batch")) return false; // fewer asks in a hard season
   return !isQuiet(o.now, o.prefs?.quiet_start, o.prefs?.quiet_end); // every category respects quiet hours (spec §12)
 }
+
+// ── Scheduling helpers for the reminder cron ─────────────────────────────────
+/** Day of week in Africa/Lagos, 0 = Sunday. */
+export const lagosDow = (d: Date): number => new Date(d.getTime() + 3_600_000).getUTCDay();
+
+/**
+ * Is a daily check-in nudge due today for this rhythm? Hard season is weekly at most (spec §8.4).
+ * daily: every day · few_weekly: Mon, Wed, Fri · weekly: Mondays.
+ */
+export function checkinDue(freq: string | null | undefined, now: Date, hardSeason: boolean): boolean {
+  const dow = lagosDow(now);
+  if (hardSeason || freq === "weekly") return dow === 1;
+  if (freq === "daily") return true;
+  return dow === 1 || dow === 3 || dow === 5; // few_weekly is the default
+}
+
+/** Debt reminder state for a due date: tomorrow, or overdue (reminded once, the day after it passes). */
+export function debtReminder(dueOn: string | null | undefined, todayLagos: string): "tomorrow" | "overdue" | null {
+  if (!dueOn) return null;
+  const diff = Math.floor((Date.parse(dueOn) - Date.parse(todayLagos)) / 86_400_000);
+  return diff === 1 ? "tomorrow" : diff === -1 ? "overdue" : null;
+}
+export const lagosDate = (d: Date): string => new Date(d.getTime() + 3_600_000).toISOString().slice(0, 10);

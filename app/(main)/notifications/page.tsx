@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CATEGORIES, categoryOf, type Category } from "@/lib/engine/notify";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft01Icon, Notification01Icon, Award01Icon, ChartIncreaseIcon,
@@ -19,6 +20,8 @@ interface AppNotification {
   data:       Record<string, unknown>;
   read_at:    string | null;
   created_at: string;
+  category?: string | null;
+  deep_link?: string | null;
 }
 
 // ── Config per type ────────────────────────────────────────────────────────────
@@ -73,6 +76,7 @@ export default function NotificationsPage() {
   const router = useRouter();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading]             = useState(true);
+  const [cat, setCat]                     = useState<Category | "all">("all");
 
   useEffect(() => {
     async function load() {
@@ -90,7 +94,8 @@ export default function NotificationsPage() {
   }, []);
 
   const unread = notifications.filter(n => !n.read_at).length;
-  const groups = groupByDate(notifications);
+  const shown  = cat === "all" ? notifications : notifications.filter(n => categoryOf(n.type, n.category) === cat);
+  const groups = groupByDate(shown);
 
   return (
     <div className="min-h-full pb-24" style={{ background: "#EEF3E9" }}>
@@ -109,12 +114,21 @@ export default function NotificationsPage() {
             Notifications
           </h1>
         </div>
+        <a href="/me/notifications" aria-label="Notification settings" className="min-h-11 px-3 rounded-full flex items-center text-[13px] font-semibold text-spal-navy bg-white active:scale-95 transition-transform">Settings</a>
         {unread > 0 && (
           <span className="text-[12px] font-semibold px-2.5 py-1 rounded-full"
             style={{ background: "#FEF2F2", color: "#DC2626", fontFamily: "var(--font-satoshi)" }}>
             {unread} unread
           </span>
         )}
+      </div>
+
+      {/* Groups: Spal, Journey, Community, Reminders */}
+      <div className="px-5 pb-1 flex gap-2 overflow-x-auto" role="tablist" aria-label="Notification groups">
+        {[{ key: "all", label: "All" }, ...CATEGORIES].map((c) => (
+          <button key={c.key} type="button" role="tab" aria-selected={cat === c.key} onClick={() => setCat(c.key as Category | "all")}
+            className={`shrink-0 min-h-10 px-4 rounded-full text-[13px] font-semibold border transition-colors ${cat === c.key ? "bg-spal-navy text-white border-spal-navy" : "bg-white text-spal-navy border-neutral-200"}`}>{c.label}</button>
+        ))}
       </div>
 
       {/* Content */}
@@ -125,7 +139,7 @@ export default function NotificationsPage() {
               <div key={i} className="h-[72px] rounded-2xl skeleton" />
             ))}
           </div>
-        ) : notifications.length === 0 ? (
+        ) : shown.length === 0 ? (
           <EmptyState />
         ) : (
           <AnimatePresence initial={false}>
@@ -152,6 +166,7 @@ export default function NotificationsPage() {
 // ── NotificationCard ──────────────────────────────────────────────────────────
 
 function NotificationCard({ n, index }: { n: AppNotification; index: number }) {
+  const router = useRouter();
   const cfg   = TYPE_CONFIG[n.type] ?? FALLBACK_CONFIG;
   const isNew = !n.read_at;
 
@@ -160,7 +175,11 @@ function NotificationCard({ n, index }: { n: AppNotification; index: number }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.2 }}
-      className="flex items-start gap-3 bg-white rounded-2xl px-4 py-3.5"
+      onClick={n.deep_link ? () => router.push(n.deep_link!) : undefined}
+      role={n.deep_link ? "link" : undefined}
+      tabIndex={n.deep_link ? 0 : undefined}
+      onKeyDown={n.deep_link ? (e) => { if (e.key === "Enter") router.push(n.deep_link!); } : undefined}
+      className={`flex items-start gap-3 bg-white rounded-2xl px-4 py-3.5 ${n.deep_link ? "cursor-pointer active:scale-[0.99] transition-transform" : ""}`}
       style={{
         boxShadow: isNew ? "0 2px 8px rgba(0,0,0,0.07)" : "0 1px 3px rgba(0,0,0,0.04)",
         border:    isNew ? "1.5px solid #E5E7EB" : "1.5px solid transparent",

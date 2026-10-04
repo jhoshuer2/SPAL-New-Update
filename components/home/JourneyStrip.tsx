@@ -8,6 +8,7 @@ import type { JourneyData } from "@/lib/journey/server";
 import { LEVELS } from "@/lib/engine/levels";
 import { nudgeFor, todaysFocus } from "@/lib/engine/modules";
 import { CheckInCard } from "@/components/spal/CheckInCard";
+import { CommunityPeek } from "@/components/home/CommunityPeek";
 
 const dayOfYear = () => Math.floor((Date.now() - Date.UTC(new Date().getUTCFullYear(), 0, 0)) / 86_400_000);
 
@@ -19,6 +20,7 @@ export function JourneyStrip({ data }: { data: JourneyData }) {
   const fade = (i: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] as const } });
 
   return (
+    <>
     <div className="px-5 mt-5 space-y-3" data-testid="journey-strip">
       {/* Existing users who have not been placed yet get one gentle invitation */}
       {!onboardingDone && (
@@ -72,5 +74,7 @@ export function JourneyStrip({ data }: { data: JourneyData }) {
         </Link>
       </motion.div>
     </div>
+    <CommunityPeek />
+    </>
   );
 }

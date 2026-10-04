@@ -63,3 +63,21 @@
 - [ ] Part payments are not reflected in the legacy "Outstanding debt" tile (it counts the full sale until fully paid)
 - [ ] Overview aggregates in the API, not in a SQL view/RPC yet (fine to ~10k rows per range)
 - [ ] Not verified against a real Supabase or a live model (planning drafts fall back to written text without AI credit)
+
+## Phase 1e/1f · Community and settings (built; verified with mocked data and the real browser for the PIN lock)
+- [x] Migration 028 (additive, idempotent, down path): posts, comments, reactions, saves, reports, blocks, notification prefs, deletion requests, feedback; `posts_public`, `comments_public`, `profiles_public` views
+- [x] Privacy enforced in the database: anonymous authors masked, hidden profiles invisible, blocks apply both ways (incl. anonymous posts), signed-out gets nothing, **strict column allow-list per view**. Verified on a fresh local Postgres; the test fails when each rule is deliberately broken
+- [x] I01 feed (For you, My level; Following arrives with connections), I02 post detail with replies, I03 create post (type, photos, attach a completed milestone or private-info-free moment, anonymous, who can see), I09 profile, I15 report & block
+- [x] Spal privacy guard: warns about amounts, phone and account numbers, emails before posting; one tap to hide the details
+- [x] Posting under your name needs a visible profile; asked explicitly ("Post under your name?"), never assumed. Everyone starts hidden
+- [x] Photos re-encoded in the browser before upload: location data removed, max 1600px, under 1MB
+- [x] L01 Me, L02 edit profile, L03 privacy centre, L04 security (change password, PIN app lock, log out everywhere), L05 notification settings (per category, quiet hours, check-in rhythm, amounts off lock screen), L07 help & feedback, L10 delete account (30-day grace), L11 about
+- [x] App lock: salted PBKDF2 PIN on the device, locks on cold start and after 5 minutes away, back-off after wrong tries
+- [x] Notifications: milestone_done, level_up_ready, comment_reply, reaction_batch (hourly), debt_due, launch_task, checkin_daily with prefs, quiet hours (Lagos), hard season, no amounts on lock screen unless opted in; C04 grouped by Spal/Journey/Community/Reminders, opens the right screen
+- [x] Cron: `/api/cron/reminders` (morning and evening) scheduled; `/api/cron/purge-deleted` written and tested but **not scheduled** (irreversible)
+- [x] Avatar opens Me; Home shows a community post from your level; new areas require login
+- [x] 129 tests
+- [ ] Not built: connections, circles, DMs, Q&A (V1), moderation admin queue, mentor sharing, data export (L09), language screen (L08), signed-in devices list, fingerprint/face unlock (needs native app or WebAuthn), check-in at the user's exact chosen time (cron runs once in the evening)
+- [ ] Customer names in the privacy guard need AI (amounts, phones, accounts, emails are caught without it)
+- [ ] Nigeria Data Protection Act 2023 review, Terms and Privacy Policy text: launch checklist (spec §13), not code
+- [ ] Not verified against a real Supabase

@@ -23,8 +23,22 @@ describe("scanPrivate", () => {
   it("reports one finding per detail, not overlapping ones", () => {
     expect(scanPrivate("I made ₦45,000")).toHaveLength(1);
   });
+  it("keeps the space after an amount when redacting", () => {
+    for (const [t, want] of [["I made ₦45,000 this week", "I made [amount hidden] this week"], ["paid 2500 naira today", "paid [amount hidden] today"], ["earned 30k this month, nice", "earned [amount hidden] this month, nice"], ["N5000 only", "[amount hidden] only"]] as const)
+      expect(redact(t, scanPrivate(t)), t).toBe(want);
+  });
   it("redacts without breaking the sentence", () => {
     const t = "I made ₦45,000, call 08031234567 or ada@shop.com";
     expect(redact(t, scanPrivate(t))).toBe("I made [amount hidden], call [phone hidden] or [email hidden]");
+  });
+});
+
+import { describeFindings } from "./privacy";
+describe("describeFindings", () => {
+  it("reads naturally", () => {
+    expect(describeFindings(scanPrivate("I made ₦45,000"))).toBe("an amount of money");
+    expect(describeFindings(scanPrivate("₦45,000, call 08031234567"))).toBe("an amount of money and a phone number");
+    expect(describeFindings(scanPrivate("₦45,000, call 08031234567, ada@shop.com"))).toBe("an amount of money, a phone number and an email address");
+    expect(describeFindings([])).toBe("");
   });
 });

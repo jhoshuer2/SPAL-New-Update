@@ -75,6 +75,10 @@ export default function JourneyRoadmap() {
             </Section>
 
             <div className="px-5 mt-2 grid grid-cols-2 gap-3">
+              <Link href="/community" className={`${cardCls} p-4 active:scale-[0.98] transition-transform`}>
+                <p style={{ fontFamily: FF }} className="text-[15px] font-bold text-spal-navy">Community</p>
+                <p className="text-[13px] text-neutral-500">Others on the same path</p>
+              </Link>
               <Link href="/journey/timeline" className={`${cardCls} p-4 active:scale-[0.98] transition-transform`}>
                 <p style={{ fontFamily: FF }} className="text-[15px] font-bold text-spal-navy">Timeline</p>
                 <p className="text-[13px] text-neutral-500">Your story so far</p>

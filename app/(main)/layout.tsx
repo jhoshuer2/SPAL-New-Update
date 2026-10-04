@@ -4,6 +4,7 @@ import { BadgeCelebration } from "@/components/gamification/BadgeCelebration";
 import { PWAInstallPrompt } from "@/components/shared/PWAInstallPrompt";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { SyncStatus } from "@/components/shared/SyncStatus";
+import { AppLock } from "@/components/me/AppLock";
 
 export default function MainLayout({
   children,
@@ -13,6 +14,7 @@ export default function MainLayout({
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <UserHydration />
+      <AppLock />
       <SyncStatus />
       {/*
         flex-1 + overflow-y-auto = scrollable content area.

@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
+import pkg from "./package.json";
 
 const nextConfig: NextConfig = {
+  env: { NEXT_PUBLIC_APP_VERSION: pkg.version },
+
   // Turbopack is disabled via --no-turbopack in the dev script.
   // Do NOT add a `turbopack` key here — its presence enables Turbopack
   // even without the --turbopack flag in Next.js 16 on Windows.

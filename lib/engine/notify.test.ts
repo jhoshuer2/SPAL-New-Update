@@ -63,3 +63,32 @@ describe("categoryOf", () => {
     expect(categoryOf("mystery")).toBe("spal");
   });
 });
+
+import { checkinDue, debtReminder, lagosDate } from "./notify";
+describe("reminder scheduling", () => {
+  const mon = new Date(Date.UTC(2026, 9, 5, 16)); // Mon 5 Oct, 17:00 Lagos
+  const tue = new Date(Date.UTC(2026, 9, 6, 16));
+  const wed = new Date(Date.UTC(2026, 9, 7, 16));
+  it("check-in rhythm", () => {
+    expect(checkinDue("daily", tue, false)).toBe(true);
+    expect(checkinDue("few_weekly", mon, false)).toBe(true);
+    expect(checkinDue("few_weekly", tue, false)).toBe(false);
+    expect(checkinDue(undefined, wed, false)).toBe(true); // default is few a week
+    expect(checkinDue("weekly", mon, false)).toBe(true);
+    expect(checkinDue("weekly", wed, false)).toBe(false);
+  });
+  it("hard season is weekly at most, even if you chose daily", () => {
+    expect(checkinDue("daily", tue, true)).toBe(false);
+    expect(checkinDue("daily", mon, true)).toBe(true);
+  });
+  it("uses the Lagos calendar day", () => {
+    expect(lagosDate(new Date(Date.UTC(2026, 9, 5, 23, 30)))).toBe("2026-10-06"); // 00:30 Lagos is already the 6th
+  });
+  it("reminds the day before a debt is due, and once the day after", () => {
+    expect(debtReminder("2026-10-08", "2026-10-07")).toBe("tomorrow");
+    expect(debtReminder("2026-10-06", "2026-10-07")).toBe("overdue");
+    expect(debtReminder("2026-10-07", "2026-10-07")).toBeNull();
+    expect(debtReminder("2026-10-20", "2026-10-07")).toBeNull();
+    expect(debtReminder(null, "2026-10-07")).toBeNull();
+  });
+});
