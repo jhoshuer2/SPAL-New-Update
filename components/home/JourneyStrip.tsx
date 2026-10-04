@@ -7,6 +7,7 @@ import { FF, Ring, cardCls } from "@/components/journey/ui";
 import type { JourneyData } from "@/lib/journey/server";
 import { LEVELS } from "@/lib/engine/levels";
 import { nudgeFor, todaysFocus } from "@/lib/engine/modules";
+import { CheckInCard } from "@/components/spal/CheckInCard";
 
 const dayOfYear = () => Math.floor((Date.now() - Date.UTC(new Date().getUTCFullYear(), 0, 0)) / 86_400_000);
 
@@ -60,9 +61,12 @@ export function JourneyStrip({ data }: { data: JourneyData }) {
         </Link>
       </motion.div>
 
+      {/* H06: when Spal starts the conversation (hidden once answered) */}
+      <CheckInCard />
+
       {/* Spal's line: tap to chat */}
       <motion.div {...fade(4)}>
-        <Link href="/ask" className="flex items-start gap-3 rounded-[20px] bg-white/70 border border-neutral-200/60 p-4 active:scale-[0.99] transition-transform">
+        <Link href="/spal" className="flex items-start gap-3 rounded-[20px] bg-white/70 border border-neutral-200/60 p-4 active:scale-[0.99] transition-transform">
           <span aria-hidden className="mt-0.5 w-8 h-8 rounded-full bg-[#22C55E]/15 flex items-center justify-center shrink-0"><span className="w-3 h-3 rounded-full bg-[#22C55E]" /></span>
           <span className="text-[14px] text-spal-navy leading-snug"><span className="block text-[12px] font-medium text-neutral-500 mb-0.5">Spal</span>{nudge}</span>
         </Link>

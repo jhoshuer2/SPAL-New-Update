@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { askSPAL, askVision } from "@/lib/ai/chat";
 import { todayISO, weekStartISO } from "@/lib/utils/dates";
+import { extractMemory, spalChat } from "@/lib/ai/spal";
+import { LIMIT_MESSAGE, overBudget } from "@/lib/ai/usage";
+import type { DataRef, SpalAction } from "@/lib/engine/spal";
 
 // POST /api/ai/chat — Ask SPAL a question
 export async function POST(req: NextRequest) {
@@ -13,6 +16,10 @@ export async function POST(req: NextRequest) {
 
     const { message, conversationId, dryRun, precomputedReply, mode, attachmentUrl } = await req.json();
     if (!message?.trim()) return NextResponse.json({ success: false, error: "Message required" }, { status: 400 });
+    // Daily AI budget (spec §9.1): a friendly message, never an error.
+    if (await overBudget(user.id)) {
+      return NextResponse.json({ success: true, data: { reply: LIMIT_MESSAGE, limited: true, conversationId } });
+    }
     // dryRun   = compute the reply but don't save (speculative prefetch while the user is still talking)
     // precomputedReply = skip the AI call, just persist a reply we already computed during prefetch
 
@@ -91,33 +98,47 @@ export async function POST(req: NextRequest) {
     };
     const augmentedMessage = mode && FORMAT[mode] ? message + FORMAT[mode] : message;
 
-    // Call OpenAI — vision when there's an attachment, otherwise the normal chat.
-    const reply = precomputedReply?.trim()
-      ? precomputedReply.trim()
-      : attachmentUrl
-        ? await askVision({ message, imageUrl: attachmentUrl, currency: userData?.currency ?? "NGN" })
-        : await askSPAL({
-            message: augmentedMessage,
-            history,
-            user: userData ?? {},
-            summaries: summaries ?? [],
-            dailyBreakdown,
-            recentRecords: (recentRecords ?? []).slice(0, 30).map(r => ({
-              type:        r.type,
-              amount:      Number(r.amount),
-              description: r.description ?? r.category ?? r.type,
-              date:        r.created_at.split("T")[0],
-            })),
-            currency: userData?.currency ?? "NGN",
-            brief: !mode, // graph/analytics need the full structured block
-          });
+    // Normal chat goes through Spal's grounded companion. Graph/analytics modes and image
+    // attachments keep their specialised paths (structured blocks / vision).
+    let dataRefs: DataRef[] = [];
+    let actions: SpalAction[] = [];
+    let memoryPaused = true;
+    let reply: string;
+    if (precomputedReply?.trim()) {
+      reply = precomputedReply.trim();
+    } else if (attachmentUrl) {
+      reply = await askVision({ message, imageUrl: attachmentUrl, currency: userData?.currency ?? "NGN" });
+    } else if (mode) {
+      reply = await askSPAL({
+        message: augmentedMessage,
+        history,
+        user: userData ?? {},
+        summaries: summaries ?? [],
+        dailyBreakdown,
+        recentRecords: (recentRecords ?? []).slice(0, 30).map(r => ({
+          type:        r.type,
+          amount:      Number(r.amount),
+          description: r.description ?? r.category ?? r.type,
+          date:        r.created_at.split("T")[0],
+        })),
+        currency: userData?.currency ?? "NGN",
+        brief: false,
+      });
+    } else {
+      const r = await spalChat({
+        supabase, userId: user.id, message,
+        history: history.slice(-10).map((m: { role: "user" | "assistant"; content: string }) => ({ role: m.role, content: m.content })),
+        brief: !!dryRun, // spoken replies (voice prefetch) stay to a sentence or two
+      });
+      reply = r.reply; dataRefs = r.dataRefs; actions = r.actions; memoryPaused = r.memoryPaused;
+    }
 
     // Speculative prefetch: return the reply without saving anything.
     if (dryRun) {
-      return NextResponse.json({ success: true, data: { reply } });
+      return NextResponse.json({ success: true, data: { reply, dataRefs, actions } });
     }
 
-    const newAssistantMsg = { role: "assistant" as const, content: reply, timestamp: new Date().toISOString() };
+    const newAssistantMsg = { role: "assistant" as const, content: reply, timestamp: new Date().toISOString(), ...(dataRefs.length ? { dataRefs } : {}), ...(actions.length ? { actions } : {}) };
     const updatedMessages = [...history, newUserMsg, newAssistantMsg];
 
     // Save conversation
@@ -138,9 +159,14 @@ export async function POST(req: NextRequest) {
       savedConvId = newConv?.id;
     }
 
+    // Learn from the exchange after the response is sent (skipped if the user paused learning).
+    if (!mode && !attachmentUrl && !precomputedReply?.trim() && !memoryPaused) {
+      after(() => extractMemory(user.id, message, reply, false));
+    }
+
     return NextResponse.json({
       success: true,
-      data: { reply, conversationId: savedConvId },
+      data: { reply, dataRefs, actions, conversationId: savedConvId },
     });
   } catch (err) {
     console.error("POST /api/ai/chat", err);

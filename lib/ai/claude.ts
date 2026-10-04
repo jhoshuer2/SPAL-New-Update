@@ -25,8 +25,10 @@ type CallOpts = {
   effort?: Effort;
 };
 
-/** Plain text completion. Returns concatenated text blocks. */
-export async function askText(opts: CallOpts): Promise<string> {
+export type Usage = { input: number; output: number };
+
+/** Plain text completion that also reports token usage (for the daily budget). */
+export async function askTextFull(opts: CallOpts): Promise<{ text: string; usage: Usage; refused: boolean }> {
   const model = opts.model ?? MODEL_MAIN();
   const res = await claude().messages.create({
     model,
@@ -35,11 +37,17 @@ export async function askText(opts: CallOpts): Promise<string> {
     ...(model.includes("haiku") ? {} : { output_config: { effort: opts.effort ?? "low" } }),
     messages: opts.messages,
   });
-  if (res.stop_reason === "refusal") return "";
-  return res.content
+  const text = res.content
     .flatMap((b) => (b.type === "text" ? [b.text] : []))
     .join("")
     .trim();
+  const refused = res.stop_reason === "refusal";
+  return { text: refused ? "" : text, usage: { input: res.usage.input_tokens, output: res.usage.output_tokens }, refused };
+}
+
+/** Plain text completion. Returns concatenated text blocks. */
+export async function askText(opts: CallOpts): Promise<string> {
+  return (await askTextFull(opts)).text;
 }
 
 /** Extract the first JSON object from model text (tolerates ``` fences and chatter). */

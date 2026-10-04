@@ -10,17 +10,21 @@ import {
 } from "hugeicons-react";
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { formatCurrency } from "@/lib/utils/currency";
+import { ActionChips, DataNote } from "@/components/spal/ActionChips";
+import { useJourney } from "@/components/journey/useJourney";
+import { suggestedPrompts, type DataRef, type SpalAction } from "@/lib/engine/spal";
 
 const BG = "#EDF3E8";
 const FF = "var(--font-satoshi)";
 
-const SUGGESTIONS = [
-  "What is the price of rice in Kubwa?",
-  "How much did I make in 2025?",
-  "What is the price of tomatoes in Lagos?",
+// Used until the user's level is known (or if it can't be loaded).
+const DEFAULT_SUGGESTIONS = [
+  "How are my sales this week?",
+  "How can I get more customers?",
+  "Which of my costs should I look at first?",
 ];
 
-interface Msg { role: "user" | "assistant"; content: string }
+interface Msg { role: "user" | "assistant"; content: string; dataRefs?: DataRef[]; actions?: SpalAction[] }
 
 export default function AskPage() {
   return <Suspense><AskInner /></Suspense>;
@@ -30,6 +34,8 @@ function AskInner() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   // `?prompt=` pre-fills the box (used by "Ask Spal for help" on milestones). The user still presses send.
+  const { state: journey } = useJourney();
+  const SUGGESTIONS = journey.status === "ready" ? suggestedPrompts(journey.data.level, { hasEverRecorded: journey.data.hasEverRecorded, hardSeason: journey.data.hardSeason }) : DEFAULT_SUGGESTIONS;
   const initialPrompt = useSearchParams().get("prompt") ?? "";
   const [input, setInput] = useState(initialPrompt);
   const [sending, setSending] = useState(false);
@@ -91,7 +97,7 @@ function AskInner() {
       });
       const d = await res.json();
       if (d.success) {
-        setMessages((m) => [...m, { role: "assistant", content: d.data.reply }]);
+        setMessages((m) => [...m, { role: "assistant", content: d.data.reply, dataRefs: d.data.dataRefs, actions: d.data.actions }]);
         if (d.data.conversationId) setConversationId(d.data.conversationId);
       } else {
         setMessages((m) => [...m, { role: "assistant", content: "Sorry, I couldn't answer that. Please try again." }]);
@@ -172,12 +178,14 @@ function AskInner() {
               if (parsed) return <div key={i} className="flex justify-start"><div className="w-[90%]"><RichReply parsed={parsed} /></div></div>;
             }
             return (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
                 <div className="max-w-[82%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed whitespace-pre-wrap"
                   style={{ fontFamily: FF, background: m.role === "user" ? "#22C55E" : "#fff",
                     color: m.role === "user" ? "#fff" : "#0F172A", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
                   {m.content}
+                  {m.role === "assistant" && <DataNote refs={m.dataRefs} />}
                 </div>
+                {m.role === "assistant" && m.actions?.length ? <div className="max-w-[82%]"><ActionChips actions={m.actions} /></div> : null}
               </div>
             );
           })}

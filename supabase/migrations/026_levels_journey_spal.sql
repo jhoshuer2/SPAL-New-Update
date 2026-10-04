@@ -141,6 +141,8 @@ CREATE INDEX IF NOT EXISTS user_milestones_user_idx ON public.user_milestones(us
 CREATE INDEX IF NOT EXISTS moments_user_idx ON public.moments(user_id, occurred_on DESC) WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS spal_memory_user_idx ON public.spal_memory(user_id) WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS checkins_user_idx ON public.checkins(user_id, scheduled_for DESC);
+-- One check-in per user per (UTC) day, so opening it twice at once can never create two.
+CREATE UNIQUE INDEX IF NOT EXISTS checkins_one_per_day ON public.checkins (user_id, ((scheduled_for AT TIME ZONE 'UTC')::date));
 CREATE INDEX IF NOT EXISTS ai_usage_user_day_idx ON public.ai_usage(user_id, created_at DESC);
 
 -- ── updated_at triggers ─────────────────────────────────────────────────────

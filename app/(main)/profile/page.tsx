@@ -16,7 +16,7 @@ import {
   Store01Icon, Coins01Icon, ReceiptDollarIcon, ArrowRight01Icon, Camera01Icon, FireIcon, Tick01Icon, Alert01Icon,
   BookOpen01Icon, Message01Icon, GridViewIcon, File01Icon, Folder01Icon,
   PlusSignIcon, Archive01Icon, Building04Icon,
-  Briefcase01Icon, Location01Icon, UserAdd01Icon, Invoice01Icon, HelpCircleIcon, Shield01Icon, Share08Icon, Search01Icon,
+  Briefcase01Icon, Wallet01Icon, PackageIcon, AiBrain01Icon, Location01Icon, UserAdd01Icon, Invoice01Icon, HelpCircleIcon, Shield01Icon, Share08Icon, Search01Icon,
 } from "hugeicons-react";
 import type { TrackingMethod } from "@/store";
 
@@ -328,6 +328,9 @@ export default function ProfilePage() {
       {/* Menu group 2 */}
       <div className="px-4 mt-4">
         <div className="bg-white rounded-3xl px-2 py-1" style={{ boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}>
+          <ProfileRow icon={<AiBrain01Icon size={20} color="#16A34A" />} tint="#E4F5E9" title="What Spal knows" sub="See, edit or delete what Spal has learned" onClick={() => router.push("/spal/memory")} />
+          <ProfileRow icon={<Wallet01Icon size={20} color="#2563EB" />} tint="#E4ECFB" title="Wallet" sub="Your device and number" onClick={() => router.push("/wallet")} />
+          <ProfileRow icon={<PackageIcon size={20} color="#8B5CF6" />} tint="#EEE7FB" title="Stock & ingredients" sub="Manage what you have in stock" onClick={() => router.push("/inventory")} />
           <ProfileRow icon={<Notification01Icon size={20} color="#F97316" />} tint="#FDECDD" title="Notification" sub="Sales, reminders, insights on your lock screen"
             trailing={<PushToggle on={pushOn} busy={pushBusy} onToggle={togglePush} />} />
           <ProfileRow icon={<ReceiptDollarIcon size={20} color="#16A34A" />} tint="#E4F5E9" title="Receipts & Tax" sub="Manage currency, receipt and tax amount" onClick={() => router.push("/profile/receipts")} />

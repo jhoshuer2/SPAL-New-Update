@@ -34,3 +34,16 @@
 - [ ] AI nudge (`spal-nudge`): templated line for now; needs Anthropic credit
 - [ ] "Others who completed this recently" on D03 and user counts on D02 need community data (Phase 1e)
 - [ ] Not verified against a real Supabase (blocked); API routes are type-checked and the SQL they rely on is tested locally
+
+## Phase 1d · Spal (built; model behaviour not yet verified live)
+- [x] H02 chat: the existing `/ask` now answers through Spal's companion (level-aware prompt, profile, goals, aggregated 7/30/90-day money, top sellers, ranked memory, recent moments and check-ins)
+- [x] "Based on your sales from the last 30 days" note and inline actions (save as goal, save as moment) under replies; Spal only offers, the user taps
+- [x] Memory extraction after each exchange (skipped if learning is paused; sensitive details filtered; de-duplicated)
+- [x] Daily token budget (`SPAL_DAILY_TOKEN_BUDGET`, default 100k) with a friendly limit message; usage logged to `ai_usage`
+- [x] H01 Spal home (suggested prompts by level, recent chats, modes), H07 What Spal knows (edit, delete, pause)
+- [x] C02/H06 daily check-in: one question a day by level, tap or write, gentle "x of last 7 days" (hidden in hard season), warm reply, written answers become private moments
+- [x] Nav: Home, Journey, Spal, Sell, Inventory; Wallet and Stock moved to the profile menu
+- [x] 51 tests, including the chat/memory/budget logic with Claude and the database faked
+- [ ] Not verified: real model output (Anthropic account has no credit), real Supabase
+- [ ] Not built: streaming replies, Brainstorm/Challenge (V1), Voice (Later), Pidgin eval fixtures (spec §9.7), daily check-in push scheduling, `spal-nudge` AI line (templated for now)
+- [ ] Distress handling relies on the prompt; helpline content record (flagged "verify") still to add
